@@ -50,25 +50,18 @@ module.exports = function (passport) {
     })
 
     passport.deserializeUser((user, done) => {
-        // console.log(user)
         User.findAll({
             where: {
                 id: user.id
             }
         }).then((user) => {
-
-            // console.log(user)
             done(null, user)
 
         }).catch((err) => {
-
             console.log(err)
             done(err, null)
 
         })
-        // (id, (err, user) => {
-        //     done(err, user)
-        // })
     })
 
 }
