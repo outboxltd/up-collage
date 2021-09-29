@@ -9,10 +9,10 @@ module.exports = function (passport) {
             passwordField: 'Password'
         }, (email, password, done) => {
             // Match user
-            // console.log(email)
+            console.log(email, password)
             User.findOne({
                 where: {
-                    EmailAddress: EmailAddress
+                    EmailAddress: email
                 }
             }).then(user => {
                 if (!user) {
@@ -27,39 +27,18 @@ module.exports = function (passport) {
                     })
                 }
 
-                // Match password
-
-                // bcrypt.hash(password, user.salt, (err, hash) => {
-                //     console.log(hash.substring(0, hash.length - 15)) // I've cut it because for some reason the same-salted hash of the new password had 15 new characters
-                // })
-
                 bcrypt.hash(password, user.Salt, (err, hash) => {
                     let hashed = hash.substring(0, hash.length - 15)
-                    // console.log(hashed)
-                    // console.log(user.password)
+                    console.log(hash, hashed)
+                    console.log(user.Password)
 
-                    if (hashed == user.Password) {
+                    if (hash == user.Password) {
                         return done(null, user);
                     } else {
                         return done(null, false, {
                             message: 'Password incorrect'
                         });
                     }
-
-                    // Again, compare for some reason didn't work
-                    // bcrypt.compare(hashed, user.password, (err, isMatch) => {
-                    //     // console.log(hash)
-                    //     // console.log(user.password)
-                    //     console.log(isMatch)
-                    //     if (err) throw err;
-                    //     if (isMatch) {
-                    //         return done(null, user);
-                    //     } else {
-                    //         return done(null, false, {
-                    //             message: 'Password incorrect'
-                    //         });
-                    //     }
-                    // });
                 });
 
             });
