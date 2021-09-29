@@ -1,0 +1,118 @@
+/* @import url('https://bootswatch.com/4/journal/bootstrap.min.css'); */
+
+.alert {
+    position: relative;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    width: 50%;
+    margin-left: 25%;
+}
+
+.alert-dismissible {
+    padding-right: 4rem;
+  }
+
+  .fade {
+    -webkit-transition: opacity 0.15s linear;
+    transition: opacity 0.15s linear;
+  }
+
+.error {
+    margin: 10px 10px;
+    vertical-align: middle;
+    color: #D8000C;
+    background-color: #FFD2D2;
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border-radius: 1em;
+    display: flex;
+    justify-content: center;
+}
+
+.error i {
+    padding-top: 4px;
+    padding-right: 1em;
+}
+
+.error p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* ======================= */
+
+
+.success {
+    margin: 10px 10px;
+    vertical-align: middle;
+    color: #4F8A10;
+    background-color: #DFF2BF;
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border-radius: 1em;
+    display: flex;
+    justify-content: center;
+
+}
+
+.success i {
+    padding-top: 4px;
+    padding-right: 1em;
+}
+
+.success p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* ==================== */
+
+.info {
+    margin: 10px 10px;
+    vertical-align: middle;
+    color: #00529B;
+    background-color: #BDE5F8;
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border-radius: 1em;
+    display: flex;
+    justify-content: center;
+}
+
+.info i {
+    padding-top: 4px;
+    padding-right: 1em;
+}
+
+.info p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* ==================== */
+
+.warning {
+    margin: 10px 10px;
+    vertical-align: middle;
+    color: #00529B;
+    background-color: #BDE5F8;
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border-radius: 1em;
+    display: flex;
+    justify-content: center;
+}
+
+.warning i {
+    padding-top: 4px;
+    padding-right: 1em;
+}
+
+.warning p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* ==================== */
