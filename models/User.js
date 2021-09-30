@@ -35,9 +35,10 @@ const User = db.define('user', {
         type: sequelize.STRING,
         required: true
     },
-    Salt: {
-        type: sequelize.STRING,
-        required: true
+    IsAdmin: {
+        type: sequelize.BOOLEAN,
+        required: true,
+        defaultValue: 0
     },
 })
 

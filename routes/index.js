@@ -11,6 +11,35 @@ const bcrypt = require('bcryptjs')
 const passport = require('passport')
 const { Op } = require("sequelize");
 
+/* ================== TEST ================== */
+
+router.post('/test', (req, res) => {
+
+  let {
+    HashedPassword,
+    TestedPassword
+  } = req.body;
+
+  console.log(req.body)
+
+  bcrypt.compare(TestedPassword, HashedPassword, function(err, res) {
+    if (err){
+      // handle error
+      console.log(err);
+    }
+    if (res) {
+      // success!
+      console.log("success");
+    } else {
+      // fail!
+      console.log("fail");
+    }
+  });
+  
+  res.send("Y")
+
+})
+
 /* ================== REGISTER ================== */
 
 router.get('/', function (req, res, next) {
@@ -29,10 +58,13 @@ router.post('/', (req, res) => {
     Password2
   } = req.body;
 
+  let body_without_GeneralNotes = {...req.body}
+  delete body_without_GeneralNotes.GeneralNotes;
+  
   let errors = [];
 
-  // Check if all fields are empty
-  if (Object.values(req.body).includes("")) errors.push("FIELDS_EMPTY");
+  // Check if all fields are empty(except GeneralNotes)
+  if (Object.values(body_without_GeneralNotes).includes("")) errors.push("FIELDS_EMPTY");
 
   // Check if FullName has a space
   if (!req.body["FullName"].includes(" ")) errors.push("PARTIAL_FULLNAME");
@@ -101,7 +133,6 @@ router.post('/', (req, res) => {
           TeamsAtOrganization: TeamsAtOrganization,
           GeneralNotes: GeneralNotes,
           Password: Password,
-          Salt: null,
         });
 
         //Hash pass
@@ -111,13 +142,10 @@ router.post('/', (req, res) => {
 
             console.log(salt, hash)
 
-            newUser.Salt = salt
-
             newUser.Password = hash
 
             newUser.save()
               .then(user => {
-                // req.flash('warning_msg', 'Verification email was sent, if not sent check spam.')
                 res.redirect('/login')
               })
               .catch(err => console.log(err))

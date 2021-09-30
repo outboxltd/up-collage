@@ -8,7 +8,6 @@ module.exports = function (passport) {
             usernameField: 'EmailAddress',
             passwordField: 'Password'
         }, (email, password, done) => {
-            // Match user
             console.log(email, password)
             User.findOne({
                 where: {
@@ -21,25 +20,23 @@ module.exports = function (passport) {
                     });
                 }
 
-                if (user.verified == 0) {
-                    return done(null, false, {
-                        message: 'That user isn\'t verified'
-                    })
-                }
-
-                bcrypt.hash(password, user.Salt, (err, hash) => {
-                    let hashed = hash.substring(0, hash.length - 15)
-                    console.log(hash, hashed)
-                    console.log(user.Password)
-
-                    if (hash == user.Password) {
-                        return done(null, user);
-                    } else {
-                        return done(null, false, {
-                            message: 'Password incorrect'
-                        });
+                bcrypt.compare(password, user.Password, function(err, res) {
+                    if (err){
+                      // handle error
+                      console.log(err);
                     }
-                });
+                    if (res) {
+                      // success!
+                      console.log("success");
+                      return done(null, user);
+                    } else {
+                      // fail!
+                      console.log("fail");
+                      return done(null, false, {
+                        message: 'Password incorrect'
+                    });
+                    }
+                  });
 
             });
         })
