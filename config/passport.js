@@ -8,7 +8,6 @@ module.exports = function (passport) {
             usernameField: 'EmailAddress',
             passwordField: 'Password'
         }, (email, password, done) => {
-            console.log(email, password)
             User.findOne({
                 where: {
                     EmailAddress: email
@@ -27,7 +26,7 @@ module.exports = function (passport) {
                     }
                     if (res) {
                       // success!
-                      console.log("success");
+                      console.log(`Successfully logged in: ${email} ${password}`);
                       return done(null, user);
                     } else {
                       // fail!

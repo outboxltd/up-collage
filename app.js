@@ -1,41 +1,83 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config()
+}
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const session = require('express-session');
+// const expressLayouts = require('express-ejs-layouts')
 
-var app = express();
+const express = require('express')
+const app = express()
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
+const cookieParser = require('cookie-parser');
+const path = require("path");
+const flash = require('connect-flash');
+const passport = require('passport')
+const fileUpload = require('express-fileupload');
+
+const config = require("./config.js")
+
+const indexRouter = require("./routes/index.js");
+const usersRouter = require("./routes/users.js");
+
+app.use(express.urlencoded({
+    extended: false
+}));
+
+app.set('views', path.join(__dirname, '/views'));
+
 app.set('view engine', 'ejs');
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/partials', express.static(__dirname + '/views/partials'));
+
+app.use(cookieParser());
+app.use(fileUpload());
+
+app.use(session({
+    secret: config.secret,
+    resave: false,
+    saveUninitialized: true
+}))
+
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+require('./config/passport')(passport)
+
+app.use(flash());
+
+app.use((req, res, next) => {
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    res.locals.error = req.flash('error');
+    res.locals.warning_msg = req.flash('warning_msg');
+    res.locals.info_msg = req.flash('info_msg');
+    res.locals.currentUser = req.user ? JSON.parse(JSON.stringify(req.user, null, 2))[0] : null
+    next();
+})
+
+
+// MySQL setup - just to see there are no errors with connecting to the db
+
+// const connection = mysql.createConnection({
+//   host: config.sqlhost,
+//   user: config.sqluser,
+//   database: config.sqldb,
+//   password: config.sqlpass
+// })
+
+// MySQL is not necessary
+
+// Sequelize
+const db = require('./config/seq-setup')
+
+db.authenticate()
+    .then(() => console.log('db connected!'))
+    .catch(err => console.error(err))
+
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
-
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
+app.use('/users/', usersRouter);
 
 module.exports = app;

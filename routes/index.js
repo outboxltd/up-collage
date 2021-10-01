@@ -2,14 +2,20 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 
-const config = require("../config")
+const config = require("../config");
+const { ensureAuthenticated } = require('../config/auth')
 
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User')
-const bcrypt = require('bcryptjs')
-const passport = require('passport')
+const bcrypt = require('bcryptjs');
+const passport = require('passport');
 const { Op } = require("sequelize");
+const axios = require('axios');
+
+const User = require('../models/User');
+const Course = require('../models/Course');
+const Transaction = require('../models/Transaction');
+const Specification = require('../models/Specification');
 
 /* ================== TEST ================== */
 
@@ -22,8 +28,8 @@ router.post('/test', (req, res) => {
 
   console.log(req.body)
 
-  bcrypt.compare(TestedPassword, HashedPassword, function(err, res) {
-    if (err){
+  bcrypt.compare(TestedPassword, HashedPassword, function (err, res) {
+    if (err) {
       // handle error
       console.log(err);
     }
@@ -35,7 +41,7 @@ router.post('/test', (req, res) => {
       console.log("fail");
     }
   });
-  
+
   res.send("Y")
 
 })
@@ -58,9 +64,9 @@ router.post('/', (req, res) => {
     Password2
   } = req.body;
 
-  let body_without_GeneralNotes = {...req.body}
+  let body_without_GeneralNotes = { ...req.body }
   delete body_without_GeneralNotes.GeneralNotes;
-  
+
   let errors = [];
 
   // Check if all fields are empty(except GeneralNotes)
@@ -176,5 +182,99 @@ router.get('/logout', (req, res) => {
   res.redirect('/users/login');
 })
 
+/* ================== USER DASHBOARD ================== */
+
+router.get('/dashboard', ensureAuthenticated, async function (req, res, next) {
+
+  /*
+    * • get available courses!
+    * • status of transactions!
+    * • get all specifications!
+  */
+
+  let Courses = await Course.findAll()
+  Courses = JSON.parse(JSON.stringify(Courses, null, 2)) // [{"id": 1, "Name": "שם"}, ...]
+
+  let Transactions = await Transaction.findAll({
+    where: {
+      UserID: res.locals.currentUser.id
+    }
+  }).then(Transactionss => {
+    return Transactionss;
+  })
+  Transactions = JSON.parse(JSON.stringify(Transactions, null, 2))
+
+  let Specifications = await Specification.findAll({
+    where: {
+      UserID: res.locals.currentUser.id
+    }
+  }).then(Specificationss => {
+    return Specificationss;
+  })
+  Specifications = JSON.parse(JSON.stringify(Specifications, null, 2))
+
+  res.render('dashboard', {
+    Courses: Courses,
+    Transactions: Transactions,
+    Specifications: Specifications,
+    UserID: res.locals.currentUser.id,
+  });
+});
+
+router.post('/registerTransaction', ensureAuthenticated, async function (req, res, next) {
+  // body should contain: UserID, CourseID
+  /*
+    * Post to the webHook, should include params FullUserName, PhoneNumber, CourseName in body
+    * Create new Transaction in db.
+  */
+  req.body = JSON.parse(Object.keys(req.body)[0])
+  let {
+    UserID,
+    CourseID
+  } = req.body
+
+  let webHookURL = config.ProductBuyingWebhookURL
+
+  let Courses = await Course.findAll({
+    limit: 1,
+    where: {
+      id: CourseID
+    }
+  })
+  CourseName = JSON.parse(JSON.stringify(Courses, null, 2))[0].Name
+
+  let webHookRequest = await axios.post(webHookURL, {
+    FullUserName: res.locals.currentUser.FullName,
+    PhoneNumber: res.locals.currentUser.PhoneNumber,
+    CourseName: CourseName
+  }).then((response) => { return response }).catch((error) => { return error }); // webHookRequest.status(httpcodes)
+
+  const newTransaction = new Transaction({
+    ProductID: CourseID,
+    UserID: UserID,
+  });
+
+  const newTransactionRequest = await newTransaction.save().then(Transaction => { return true }).catch(err => { return err }) // isSuccess(if not true then err)
+
+  // if the webhookRequest and the newTransactionRequest worked then return {"code": 200} else {"code": 500, err payload(s)} 
+
+  let webHookRequestSucceed = webHookRequest.status === 200 ? true : false
+  let newTransactionRequestSucceed = newTransactionRequest === true ? true : false
+
+  if (webHookRequestSucceed && newTransactionRequestSucceed) {
+    res.json({
+      "code": 200
+    })
+  } else {
+    let resObject = {
+      "code": 500,
+    }
+    if (!webHookRequestSucceed) errPayloads["WebHookPayload"] = webHookRequest
+    if (!newTransactionRequestSucceed) errPayloads["newTransactionPayload"] = newTransactionRequest
+    res.json(resObject)
+  }
+
+
+});
 
 module.exports = router;

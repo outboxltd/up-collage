@@ -1,0 +1,12 @@
+th, td, tbody, tr {
+    text-align: center;
+}
+
+.table th, .table td {
+    max-width: 10em;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-evenly;
+}
