@@ -3,7 +3,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const config = require("../config");
-const { ensureAuthenticated } = require('../config/auth')
+const { ensureAuthenticated, checkExistingTransaction, checkExistingSpecification } = require('../config/auth')
 
 const express = require('express');
 const router = express.Router();
@@ -225,6 +225,7 @@ router.get('/dashboard', ensureAuthenticated, async function (req, res, next) {
 router.post('/registerTransaction', ensureAuthenticated, async function (req, res, next) {
   // body should contain: UserID, CourseID
   /*
+    * check if: there is an existing transaction with same userid and productid
     * Post to the webHook, should include params FullUserName, PhoneNumber, CourseName in body
     * Create new Transaction in db.
   */
@@ -235,46 +236,58 @@ router.post('/registerTransaction', ensureAuthenticated, async function (req, re
   } = req.body
 
   let webHookURL = config.ProductBuyingWebhookURL
+  let CurrentUser = res.locals.currentUser
 
-  let Courses = await Course.findAll({
-    limit: 1,
-    where: {
-      id: CourseID
-    }
-  })
-  CourseName = JSON.parse(JSON.stringify(Courses, null, 2))[0].Name
+  // check if there is an existing transaction with same userid and productid
+  let CheckExistingTransaction_ = await checkExistingTransaction(UserID, CourseID)
+  let isExistingTransaction = CheckExistingTransaction_[0]
 
-  let webHookRequest = await axios.post(webHookURL, {
-    FullUserName: res.locals.currentUser.FullName,
-    PhoneNumber: res.locals.currentUser.PhoneNumber,
-    CourseName: CourseName
-  }).then((response) => { return response }).catch((error) => { return error }); // webHookRequest.status(httpcodes)
+  if (isExistingTransaction) { // there is an existing transaction! BAD
+    req.flash('info_msg', "כבר התבצעה בקשה עבור קניית הקורס, לא ניתן לבקש עוד פעם")
+    res.redirect('/dashboard')
 
-  const newTransaction = new Transaction({
-    ProductID: CourseID,
-    UserID: UserID,
-  });
-
-  const newTransactionRequest = await newTransaction.save().then(Transaction => { return true }).catch(err => { return err }) // isSuccess(if not true then err)
-
-  // if the webhookRequest and the newTransactionRequest worked then return {"code": 200} else {"code": 500, err payload(s)} 
-
-  let webHookRequestSucceed = webHookRequest.status === 200 ? true : false
-  let newTransactionRequestSucceed = newTransactionRequest === true ? true : false
-
-  if (webHookRequestSucceed && newTransactionRequestSucceed) {
-    res.json({
-      "code": 200
-    })
   } else {
-    let resObject = {
-      "code": 500,
-    }
-    if (!webHookRequestSucceed) errPayloads["WebHookPayload"] = webHookRequest
-    if (!newTransactionRequestSucceed) errPayloads["newTransactionPayload"] = newTransactionRequest
-    res.json(resObject)
-  }
 
+    let Courses = await Course.findAll({
+      limit: 1,
+      where: {
+        id: CourseID
+      }
+    })
+    let CourseName = JSON.parse(JSON.stringify(Courses, null, 2))[0].Name
+
+    let webHookRequest = await axios.post(webHookURL, {
+      FullUserName: CurrentUser.FullName,
+      PhoneNumber: CurrentUser.PhoneNumber,
+      CourseName: CourseName
+    }).then((response) => { return response }).catch((error) => { return error }); // webHookRequest.status(httpcodes)
+
+    const newTransaction = new Transaction({
+      ProductID: CourseID,
+      UserID: UserID,
+    });
+
+    const newTransactionRequest = await newTransaction.save().then(Transaction => { return true }).catch(err => { return err }) // isSuccess(if not true then err)
+
+    // if the webhookRequest and the newTransactionRequest worked then return {"code": 200} else {"code": 500, err payload(s)} 
+
+    let webHookRequestSucceed = webHookRequest.status === 200 ? true : false
+    let newTransactionRequestSucceed = newTransactionRequest === true ? true : false
+
+    if (webHookRequestSucceed && newTransactionRequestSucceed) {
+      res.json({
+        "code": 200
+      })
+    } else {
+      let resObject = {
+        "code": 500,
+      }
+      if (!webHookRequestSucceed) errPayloads["WebHookPayload"] = webHookRequest
+      if (!newTransactionRequestSucceed) errPayloads["newTransactionPayload"] = newTransactionRequest
+      res.json(resObject)
+    }
+
+  }
 
 });
 
@@ -283,22 +296,42 @@ router.post('/registerTransaction', ensureAuthenticated, async function (req, re
 router.get('/specificateorder', ensureAuthenticated, async function (req, res, next) {
 
   let courseID = req.query.courseID
+  let CurrentUser = res.locals.currentUser
 
-  let SelectedTransaction = await Transaction.findAll({
-    limit: 1,
-    where: {
-      UserID: res.locals.currentUser.id,
-      ProductID: courseID
+  /* 
+    * Check if there is an existing transaction with same userid and productid(true -> pass)
+    * Check if there is an existing specification with same userid and productid(true -> fail)
+  */
+
+  let CheckExistingTransaction_ = await checkExistingTransaction(CurrentUser.id, courseID)
+  let isExistingTransaction = CheckExistingTransaction_[0]
+  let ExistingTransaction = isExistingTransaction ? CheckExistingTransaction_[1][0] : null
+
+  if (isExistingTransaction) { // there is an existing transaction! GOOD
+
+    let SelectedTransaction = ExistingTransaction
+
+    let CheckExistingSpecification_ = await checkExistingSpecification(CurrentUser.id, courseID)
+    let isExistingSpecification = CheckExistingSpecification_[0]
+
+    if (isExistingSpecification) { // there is an existing specification! BAD
+
+      req.flash('info_msg', "כבר קיים איפיון עבור קורס זה, לא ניתן לאפיין שוב את הקורס")
+      res.redirect('/dashboard')
+
+    } else { // there isnt an existing specification! GOOD
+
+      res.render('order-details', {
+        Transaction: SelectedTransaction,
+        UserID: CurrentUser.id,
+      });
+
     }
-  }).then(Transactions => {
-    return Transactions;
-  })
-  SelectedTransaction = JSON.parse(JSON.stringify(SelectedTransaction, null, 2))[0]
 
-  res.render('order-details', {
-    Transaction: SelectedTransaction,
-    UserID: res.locals.currentUser.id,
-  });
+  } else {
+    req.flash('info_msg', "אין גישה: קורס לא נקנה")
+    res.redirect('/dashboard')
+  }
 });
 
 router.post('/specificateorder', ensureAuthenticated, async function (req, res, next) {
@@ -314,6 +347,7 @@ router.post('/specificateorder', ensureAuthenticated, async function (req, res, 
     ProductID,
     TransactionID,
   } = req.body;
+  let CurrentUser = res.locals.currentUser
 
   console.log(req.body, CourseInstructorName)
 
@@ -322,63 +356,86 @@ router.post('/specificateorder', ensureAuthenticated, async function (req, res, 
 
   let errors = [];
 
-  // Check if all fields are empty(except GeneralNotes)
-  if (Object.values(body_without_GeneralNotes).includes("")) errors.push("ישנם מספר שורות ריקות");
+  // check if there is already an existing transaction for this userid and productid(true->pass)
+  // check if there is already an existing specification for this userid and productid(true->fail)
 
-  // Check if FullName has a space
-  if (!CourseInstructorName.includes(" ")) errors.push("שם מוביל הסדנה אינו מכיל שם משפחה/אין רווח בין השמות");
+  let CheckExistingTransaction_ = await checkExistingTransaction(CurrentUser.id, ProductID)
+  let isExistingTransaction = CheckExistingTransaction_[0]
 
-  // Validate Phone Number
-  let PhoneValidationRegex = /^0(5[^7]|[2-4]|[8-9]|7[0-9])[0-9]{7}$/;
-  if (!PhoneValidationRegex.test(CourseInstructorPhone)) errors.push("מספר הטלפון אינו תקין או ריק, מס/' הטלפון אמור להיות בפורמט תוך-ישראלי");
+  if (isExistingTransaction) { // there is an existing transaction! GOOD
 
-  // Validate Email Address
-  let EmailValidationRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  if (!EmailValidationRegex.test(CourseInstructorEmail)) errors.push("כתובת האימייל אינה תקינה/ריקה")
+    let CheckExistingSpecification_ = await checkExistingSpecification(CurrentUser.id, ProductID)
+    let isExistingSpecification = CheckExistingSpecification_[0]
 
-  if (errors.length > 0) {
-    res.render('order-details', {
-      errors: errors,
-      CourseInstructorName: CourseInstructorName,
-      CourseInstructorPhone: CourseInstructorPhone,
-      CourseInstructorEmail: CourseInstructorEmail,
-      ExpiredCourseTimeDate: ExpiredCourseTimeDate,
-      Address: Address,
-      NumberOfCourseParticipants: NumberOfCourseParticipants,
-      GeneralNotes: GeneralNotes,
-    })
+    if (isExistingSpecification) { // there is an existing specification! BAD
+
+      req.flash('info_msg', "כבר קיים איפיון עבור קורס זה, לא ניתן לאפיין שוב את הקורס")
+      res.redirect('/dashboard')
+
+    } else { // there isnt an existing specification! GOOD
+
+      // Check if all fields are empty(except GeneralNotes)
+      if (Object.values(body_without_GeneralNotes).includes("")) errors.push("ישנם מספר שורות ריקות");
+
+      // Check if FullName has a space
+      if (!CourseInstructorName.includes(" ")) errors.push("שם מוביל הסדנה אינו מכיל שם משפחה/אין רווח בין השמות");
+
+      // Validate Phone Number
+      let PhoneValidationRegex = /^0(5[^7]|[2-4]|[8-9]|7[0-9])[0-9]{7}$/;
+      if (!PhoneValidationRegex.test(CourseInstructorPhone)) errors.push("מספר הטלפון אינו תקין או ריק, מס/' הטלפון אמור להיות בפורמט תוך-ישראלי");
+
+      // Validate Email Address
+      let EmailValidationRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      if (!EmailValidationRegex.test(CourseInstructorEmail)) errors.push("כתובת האימייל אינה תקינה/ריקה")
+
+      if (errors.length > 0) {
+        res.render('order-details', {
+          errors: errors,
+          CourseInstructorName: CourseInstructorName,
+          CourseInstructorPhone: CourseInstructorPhone,
+          CourseInstructorEmail: CourseInstructorEmail,
+          ExpiredCourseTimeDate: ExpiredCourseTimeDate,
+          Address: Address,
+          NumberOfCourseParticipants: NumberOfCourseParticipants,
+          GeneralNotes: GeneralNotes,
+        })
+
+      } else {
+
+        // create a new specification in db, redirect to dashboard
+
+        let normalizedExpiredCourseTimeDate = moment(ExpiredCourseTimeDate, "DD/MM/YYYY hh:mm").add(3, 'hours').add(2, 'days').format('YYYY-MM-DD HH:mm:ss')
+
+        let newSpecification = new Specification({
+          TransactionID: TransactionID,
+          ProductID: ProductID,
+          UserID: CurrentUser.id,
+          CourseInstructorName: CourseInstructorName,
+          CourseInstructorPhone: CourseInstructorPhone,
+          CourseInstructorEmail: CourseInstructorEmail,
+          ExpiredCourseTimeDate: normalizedExpiredCourseTimeDate,
+          Address: Address,
+          NumberOfCourseParticipants: NumberOfCourseParticipants,
+          GeneralNotes: GeneralNotes,
+        })
+
+        newSpecification.save()
+          .then(Specification => {
+            res.redirect('/dashboard')
+          })
+          .catch(err => {
+            req.flash('error_msg', "האפיון לא נשמר, קיימת בעיה, אנא פנה לעזרה טכנית")
+            res.redirect('/dashboard')
+            console.log(err)
+          })
+
+      }
+
+    }
 
   } else {
-
-    // let CurrentUser = res.locals.currentUser
-
-    // create a new specification in db, redirect to dashboard
-
-    let normalizedExpiredCourseTimeDate = moment(ExpiredCourseTimeDate, "DD/MM/YYYY hh:mm").add(3, 'hours').add(2, 'days').format('YYYY-MM-DD HH:mm:ss')
-
-    let newSpecification = new Specification({
-      TransactionID: TransactionID,
-      ProductID: ProductID,
-      UserID: '1',
-      CourseInstructorName: CourseInstructorName,
-      CourseInstructorPhone: CourseInstructorPhone,
-      CourseInstructorEmail: CourseInstructorEmail,
-      ExpiredCourseTimeDate: normalizedExpiredCourseTimeDate,
-      Address: Address,
-      NumberOfCourseParticipants: NumberOfCourseParticipants,
-      GeneralNotes: GeneralNotes,
-    })
-
-    newSpecification.save()
-      .then(Specification => {
-        res.redirect('/dashboard')
-      })
-      .catch(err => {
-        req.flash('error_msg', "האפיון לא נשמר, קיימת בעיה, אנא פנה לעזרה טכנית")
-        res.redirect('/dashboard')
-        console.log(err)
-      })
-
+    req.flash('info_msg', "אין גישה: קורס לא נקנה")
+    res.redirect('/dashboard')
   }
 
 });
@@ -388,41 +445,53 @@ router.post('/specificateorder', ensureAuthenticated, async function (req, res, 
 router.get('/coursePage', ensureAuthenticated, async function (req, res, next) {
 
   let courseID = req.query.courseID
+  let CurrentUser = res.locals.currentUser
+  // check if there is already an existing transaction for this userid and productid(true->pass)
+  // check if there is already an existing specification for this userid and productid(true->pass)
 
-  // Check Specification expire date for the product id.
+  let CheckExistingTransaction_ = await checkExistingTransaction(CurrentUser.id, courseID)
+  let isExistingTransaction = CheckExistingTransaction_[0]
 
-  let SelectedSpecification = await Specification.findAll({
-    limit: 1,
-    where: {
-      UserID: res.locals.currentUser.id,
-      ProductID: courseID
+  if (isExistingTransaction) { // there is an existing transaction! GOOD
+
+    let CheckExistingSpecification_ = await checkExistingSpecification(CurrentUser.id, courseID)
+    let isExistingSpecification = CheckExistingSpecification_[0]
+    let SelectedSpecification = isExistingSpecification ? CheckExistingSpecification_[1][0] : null
+
+    if (isExistingSpecification) { // there is an existing specification! GOOD
+
+      // Check Specification expire date for the product id.
+
+
+      let FormattedExpiredCourseTimeDate = moment(SelectedSpecification.ExpiredCourseTimeDate, 'YYYY-MM-DD HH:mm:ss')
+      let Now = moment()
+
+      let isExpired = Now.diff(FormattedExpiredCourseTimeDate, "minutes", true) > 0;
+
+      if (isExpired) {
+
+        req.flash('error_msg', "התוקף של הקורס נגמר! אנא פנו לעזרה טכנית")
+        res.redirect('/dashboard')
+
+      } else {
+
+        FormattedExpiredCourseTimeDate = moment(FormattedExpiredCourseTimeDate).format("DD.MM.YYYY hh:mm")
+
+        res.render('coursePage', {
+          ExpireDate: FormattedExpiredCourseTimeDate,
+          UserID: res.locals.currentUser.id,
+        });
+
+      }
+
+    } else {
+      req.flash('info_msg', "אין גישה: הקורס לא עבר איפיון, אנא הגישו איפיון")
+      res.redirect('/dashboard')
     }
-  }).then(Specifications => {
-    return Specifications;
-  })
-  SelectedSpecification = JSON.parse(JSON.stringify(SelectedSpecification, null, 2))[0]
-
-  let FormattedExpiredCourseTimeDate = moment(SelectedSpecification.ExpiredCourseTimeDate, 'YYYY-MM-DD HH:mm:ss')
-  let Now = moment()
-
-  let isExpired = Now.diff(FormattedExpiredCourseTimeDate, "minutes", true) > 0;
-
-  console.log(isExpired)
-
-  if (isExpired) {
-
-    req.flash('error_msg', "התוקף של הקורס נגמר! אנא פנו לעזרה טכנית")
-    res.redirect('/dashboard')
 
   } else {
-
-    FormattedExpiredCourseTimeDate = moment(FormattedExpiredCourseTimeDate).format("DD.MM.YYYY hh:mm")
-
-    res.render('coursePage', {
-      ExpireDate: FormattedExpiredCourseTimeDate,
-      UserID: res.locals.currentUser.id,
-    });
-
+    req.flash('info_msg', "אין גישה: קורס לא נקנה")
+    res.redirect('/dashboard')
   }
 
 

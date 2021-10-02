@@ -56,7 +56,7 @@ async function buyCourse(e, userID) {
         // show popup
         let alertText = `נרשמת במערכת עבור קורס מזהה <code>${CourseID}</code>, מנהל מערכת יחזור אלייך בהקדם האפשרי`
         ShowAlert(alertID, alertText, 'alert-success', '.alerts')
-        FadeRemoveAlert(`#${alertID}`, 5000)
+        FadeRemoveAlert(alertID, 5000)
 
         // change status
         let columnStatus = document.querySelector(`#TransactionStatus${CourseID}`)
