@@ -17,67 +17,19 @@
 </div>
 <% } %>
 
-<% if (success_msg != '') { %>
+<% let alertOptions = {"Class": "", "Content": "", "icon": ""} %>
+<% if (success_msg != '') {alertOptions = {"Class": "alert-success", "Content": success_msg, "icon": "fa-check"}} %>
+<% if (error_msg != '') {alertOptions = {"Class": "alert-danger", "Content": error_msg, "icon": "fa-times-circle"}} %>
+<% if (warning_msg != '') {alertOptions = {"Class": "alert-warning", "Content": warning_msg, "icon": "fa-exclamation"}} %>
+<% if (info_msg != '') {alertOptions = {"Class": "alert-info", "Content": info_msg, "icon": "fa-info"}} %>
 
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    <i class="fa fa-check"></i>
+<% if (alertOptions["Class"] !== "") { %>
+<div class="alert <%= alertOptions[`Class`] %> alert-dismissible fade show" style="text-align: center;" role="alert">
+    <i class="fa <%= alertOptions[`icon`] %>" style="float: left;font-size: larger;"></i>
     &nbsp
-    <%= success_msg %>
+    <a><%= alertOptions["Content"] %></a>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
 </div>
-
-<% } %>
-
-<% if (error_msg != '') { %>
-
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="fa fa-times-circle"></i>
-    &nbsp
-    <%= error_msg %>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-
-<% } %>
-
-<% if (warning_msg != '') { %>
-
-<div class="alert alert-warning alert-dismissible fade show" role="alert">
-    <i class="fas fa-exclamation"></i>
-    &nbsp
-    <%= warning_msg %>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-
-<% } %>
-
-<% if (info_msg != '') { %>
-
-<div class="alert alert-info alert-dismissible fade show" role="alert">
-    <i class="fas fa-info"></i>
-    &nbsp
-    <%= info_msg %>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-
-<% } %>
-
-<% if (error != '') { %>
-
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="fa fa-times-circle"></i>
-    &nbsp
-    <%= error %>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-
 <% } %>

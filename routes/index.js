@@ -282,11 +282,13 @@ router.post('/registerTransaction', ensureAuthenticated, async function (req, re
 
 router.get('/specificateorder', ensureAuthenticated, async function (req, res, next) {
 
+  let courseID = req.query.courseID
+
   let SelectedTransaction = await Transaction.findAll({
     limit: 1,
     where: {
       UserID: res.locals.currentUser.id,
-      ProductID: req.query.courseID
+      ProductID: courseID
     }
   }).then(Transactions => {
     return Transactions;
@@ -380,5 +382,52 @@ router.post('/specificateorder', ensureAuthenticated, async function (req, res, 
   }
 
 });
+
+/* ================== COURSE PAGE ================== */
+
+router.get('/coursePage', ensureAuthenticated, async function (req, res, next) {
+
+  let courseID = req.query.courseID
+
+  // Check Specification expire date for the product id.
+
+  let SelectedSpecification = await Specification.findAll({
+    limit: 1,
+    where: {
+      UserID: res.locals.currentUser.id,
+      ProductID: courseID
+    }
+  }).then(Specifications => {
+    return Specifications;
+  })
+  SelectedSpecification = JSON.parse(JSON.stringify(SelectedSpecification, null, 2))[0]
+
+  let FormattedExpiredCourseTimeDate = moment(SelectedSpecification.ExpiredCourseTimeDate, 'YYYY-MM-DD HH:mm:ss')
+  let Now = moment()
+
+  let isExpired = Now.diff(FormattedExpiredCourseTimeDate, "minutes", true) > 0;
+
+  console.log(isExpired)
+
+  if (isExpired) {
+
+    req.flash('error_msg', "התוקף של הקורס נגמר! אנא פנו לעזרה טכנית")
+    res.redirect('/dashboard')
+
+  } else {
+
+    FormattedExpiredCourseTimeDate = moment(FormattedExpiredCourseTimeDate).format("DD.MM.YYYY hh:mm")
+
+    res.render('coursePage', {
+      ExpireDate: FormattedExpiredCourseTimeDate,
+      UserID: res.locals.currentUser.id,
+    });
+
+  }
+
+
+});
+
+
 
 module.exports = router;

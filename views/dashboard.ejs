@@ -47,6 +47,7 @@
         </div>
     </nav><!-- End: Navigation with Search -->
 
+    <%- include partials/messages.ejs %>
     <div class="alerts"></div>
 
     <div class="table-responsive">
@@ -72,31 +73,36 @@
                             <% let PurchaseCourseClasses = "btn btn-danger "%>
 
                             <% if (!Transaction || !Specification) { %>
-                                <% StartCourseClasses = `${StartCourseClasses} disabled` %>
+                            <% StartCourseClasses = `${StartCourseClasses} disabled` %>
                             <% } %>
 
                             <% if (!Transaction || Specification) { %>
-                                <% SpecificationCourseClasses = `${SpecificationCourseClasses} disabled` %>
+                            <% SpecificationCourseClasses = `${SpecificationCourseClasses} disabled` %>
                             <% } %>
 
                             <% if (Transaction) { %>
-                                <% PurchaseCourseClasses = `${PurchaseCourseClasses} disabled` %>
+                            <% PurchaseCourseClasses = `${PurchaseCourseClasses} disabled` %>
                             <% } %>
 
-                            <button class="<%= StartCourseClasses %>" id="StartCourse<%= Course.id %>" type="button">התחלת הסדנה</button>
-                            <button class="<%= SpecificationCourseClasses %>" id="SpecificationCourse<%= Course.id %>" onclick="window.location.replace(`/specificateorder?courseID=<%= Course.id %>`)" type="button">איפיון הסדנה</button>
-                            <button class="<%= PurchaseCourseClasses %>" id="PurchaseCourse<%= Course.id %>" type="button" onclick="buyCourse(this, '<%= UserID %>')">רכישת סדנה</button>
+                            <button class="<%= StartCourseClasses %>" id="StartCourse<%= Course.id %>"
+                                onclick="window.location.replace(`/coursePage?courseID=<%= Course.id %>`)"
+                                type="button">התחלת הסדנה</button>
+                            <button class="<%= SpecificationCourseClasses %>" id="SpecificationCourse<%= Course.id %>"
+                                onclick="window.location.replace(`/specificateorder?courseID=<%= Course.id %>`)"
+                                type="button">איפיון הסדנה</button>
+                            <button class="<%= PurchaseCourseClasses %>" id="PurchaseCourse<%= Course.id %>"
+                                type="button" onclick="buyCourse(this, '<%= UserID %>')">רכישת סדנה</button>
 
                         </div>
                     </td>
                     <% if (Transaction !== undefined) { %>
-                        <% if (Transaction.Status === "WAITING") { %>
-                            <td id="TransactionStatus<%= Course.id%>">בקשת רכישה בתהליך</td>
-                        <% } else { %>
-                            <td id="TransactionStatus<%= Course.id%>" >מאושר להתחיל</td>
-                        <% } %>
+                    <% if (Transaction.Status === "WAITING") { %>
+                    <td id="TransactionStatus<%= Course.id%>">בקשת רכישה בתהליך</td>
                     <% } else { %>
-                        <td id="TransactionStatus<%= Course.id%>">לא ממתינה רכישה</td>
+                    <td id="TransactionStatus<%= Course.id%>">מאושר להתחיל</td>
+                    <% } %>
+                    <% } else { %>
+                    <td id="TransactionStatus<%= Course.id%>">לא ממתינה רכישה</td>
                     <% } %>
                     <td id="courseName<%= Course.id%>"><%= Course.Name %></td>
                     <td id="courseID<%= Course.id%>"><%= Course.id%></td>

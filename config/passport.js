@@ -19,23 +19,23 @@ module.exports = function (passport) {
                     });
                 }
 
-                bcrypt.compare(password, user.Password, function(err, res) {
-                    if (err){
-                      // handle error
-                      console.log(err);
+                bcrypt.compare(password, user.Password, function (err, res) {
+                    if (err) {
+                        // handle error
+                        console.log(err);
                     }
                     if (res) {
-                      // success!
-                      console.log(`Successfully logged in: ${email} ${password}`);
-                      return done(null, user);
+                        // success!
+                        console.log(`Successfully logged in: ${email} ${password}`);
+                        return done(null, user);
                     } else {
-                      // fail!
-                      console.log("fail");
-                      return done(null, false, {
-                        message: 'Password incorrect'
-                    });
+                        // fail!
+                        console.log("fail");
+                        return done(null, false, {
+                            message: 'Password incorrect'
+                        });
                     }
-                  });
+                });
 
             });
         })
