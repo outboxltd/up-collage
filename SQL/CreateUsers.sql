@@ -7,9 +7,9 @@ CREATE TABLE `users` (
   `TeamsAtOrganization` int(11) NOT NULL,
   `GeneralNotes` mediumtext NOT NULL,
   `Password` longtext NOT NULL,
-  `Salt` text NOT NULL,
+  `IsAdmin` bit(1) NOT NULL DEFAULT b'0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `PhoneNumber` (`PhoneNumber`),
   UNIQUE KEY `key` (`id`),
   UNIQUE KEY `EmailAddress` (`EmailAddress`) USING HASH
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
