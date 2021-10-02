@@ -61,37 +61,36 @@
             </thead>
             <tbody>
                 <% Courses.forEach(Course => { %>
-                <% let Trans = Transactions.find(Transaction => Transaction.ProductID == Course.id) %>
-                <% let Spec = Specifications.find(Specification => Specification.ProductID == Course.id) %>
+                <% let Transaction = Transactions.find(Transaction => Transaction.ProductID == Course.id) %>
+                <% let Specification = Specifications.find(Specification => Specification.ProductID == Course.id) %>
                 <tr>
                     <td>
                         <div class="buttons">
 
-                            <% if (Spec !== undefined && (Trans !== undefined && Trans.Status === "ACCEPTED")) { %>
-                            <button class="btn btn-success" id="<%= Course.id %>" type="button">התחלת הסדנה</button>
-                            <% } else { %>
-                            <button class="btn btn-success" id="<%= Course.id %>" type="button" disabled>התחלת
-                                הסדנה</button>
+                            <% let StartCourseClasses = "btn btn-success " %>
+                            <% let SpecificationCourseClasses = "btn btn-warning " %>
+                            <% let PurchaseCourseClasses = "btn btn-danger "%>
+
+                            <% if (!Transaction || !Specification) { %>
+                                <% StartCourseClasses = `${StartCourseClasses} disabled` %>
                             <% } %>
 
-                            <% if (Spec !== undefined) { %>
-                            <button class="btn btn-warning" id="<%= Course.id %>" type="button" disabled>איפיון
-                                הסדנה</button>
-                            <% } else { %>
-                            <button class="btn btn-warning" id="<%= Course.id %>" type="button">איפיון הסדנה</button>
+                            <% if (!Transaction || Specification) { %>
+                                <% SpecificationCourseClasses = `${SpecificationCourseClasses} disabled` %>
                             <% } %>
 
-                            <% if (Trans !== undefined) { %>
-                            <button class="btn btn-danger" id="<%= Course.id %>" type="button" disabled>רכישת
-                                סדנה</button>
-                            <% } else { %>
-                            <button class="btn btn-danger" id="<%= Course.id %>" type="button"
-                                onclick="buyCourse(this, '<%= UserID %>')">רכישת סדנה</button>
+                            <% if (Transaction) { %>
+                                <% PurchaseCourseClasses = `${PurchaseCourseClasses} disabled` %>
                             <% } %>
+
+                            <button class="<%= StartCourseClasses %>" id="StartCourse<%= Course.id %>" type="button">התחלת הסדנה</button>
+                            <button class="<%= SpecificationCourseClasses %>" id="SpecificationCourse<%= Course.id %>" onclick="window.location.replace(`/specificateorder?courseID=<%= Course.id %>`)" type="button">איפיון הסדנה</button>
+                            <button class="<%= PurchaseCourseClasses %>" id="PurchaseCourse<%= Course.id %>" type="button" onclick="buyCourse(this, '<%= UserID %>')">רכישת סדנה</button>
+
                         </div>
                     </td>
-                    <% if (Trans !== undefined) { %>
-                        <% if (Trans.Status === "WAITING") { %>
+                    <% if (Transaction !== undefined) { %>
+                        <% if (Transaction.Status === "WAITING") { %>
                             <td id="TransactionStatus<%= Course.id%>">בקשת רכישה בתהליך</td>
                         <% } else { %>
                             <td id="TransactionStatus<%= Course.id%>" >מאושר להתחיל</td>
@@ -111,6 +110,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js?h=06ed58a0080308e1635633c2fd9a56a3"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/user_dashboard.js"></script>
 </body>
 

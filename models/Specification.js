@@ -1,4 +1,6 @@
 const sequelize = require('sequelize');
+const moment = require('moment');
+
 const db = require('../config/seq-setup')
 
 const Specification = db.define('specifications', {
@@ -22,24 +24,23 @@ const Specification = db.define('specifications', {
     Date: {
         type: sequelize.DATE,
         required: true,
-        defaultValue: new Date(),
+        defaultValue: moment().add(1, 'hours').format('YYYY-MM-DD HH:mm:ss'),
     },
-    CourseGuiderName: {
+    CourseInstructorName: {
         type: sequelize.STRING,
         required: true
     },
-    CourseGuiderName: {
+    CourseInstructorPhone: {
         type: sequelize.STRING,
         required: true
     },
-    CourseGuiderEmail: {
+    CourseInstructorEmail: {
         type: sequelize.STRING,
         required: true
     },
-    CourseTimeDate: {
+    ExpiredCourseTimeDate: {
         type: sequelize.DATE,
         required: true,
-        defaultValue: new Date(),
     },
     Address: {
         type: sequelize.STRING,

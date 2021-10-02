@@ -11,6 +11,7 @@ const bcrypt = require('bcryptjs');
 const passport = require('passport');
 const { Op } = require("sequelize");
 const axios = require('axios');
+const moment = require('moment');
 
 const User = require('../models/User');
 const Course = require('../models/Course');
@@ -274,6 +275,109 @@ router.post('/registerTransaction', ensureAuthenticated, async function (req, re
     res.json(resObject)
   }
 
+
+});
+
+/* ================== ORDER DETAILS SPECIFICATIONS ================== */
+
+router.get('/specificateorder', ensureAuthenticated, async function (req, res, next) {
+
+  let SelectedTransaction = await Transaction.findAll({
+    limit: 1,
+    where: {
+      UserID: res.locals.currentUser.id,
+      ProductID: req.query.courseID
+    }
+  }).then(Transactions => {
+    return Transactions;
+  })
+  SelectedTransaction = JSON.parse(JSON.stringify(SelectedTransaction, null, 2))[0]
+
+  res.render('order-details', {
+    Transaction: SelectedTransaction,
+    UserID: res.locals.currentUser.id,
+  });
+});
+
+router.post('/specificateorder', ensureAuthenticated, async function (req, res, next) {
+
+  let {
+    CourseInstructorName,
+    CourseInstructorPhone,
+    CourseInstructorEmail,
+    ExpiredCourseTimeDate,
+    Address,
+    NumberOfCourseParticipants,
+    GeneralNotes,
+    ProductID,
+    TransactionID,
+  } = req.body;
+
+  console.log(req.body, CourseInstructorName)
+
+  let body_without_GeneralNotes = { ...req.body }
+  delete body_without_GeneralNotes.GeneralNotes;
+
+  let errors = [];
+
+  // Check if all fields are empty(except GeneralNotes)
+  if (Object.values(body_without_GeneralNotes).includes("")) errors.push("ישנם מספר שורות ריקות");
+
+  // Check if FullName has a space
+  if (!CourseInstructorName.includes(" ")) errors.push("שם מוביל הסדנה אינו מכיל שם משפחה/אין רווח בין השמות");
+
+  // Validate Phone Number
+  let PhoneValidationRegex = /^0(5[^7]|[2-4]|[8-9]|7[0-9])[0-9]{7}$/;
+  if (!PhoneValidationRegex.test(CourseInstructorPhone)) errors.push("מספר הטלפון אינו תקין או ריק, מס/' הטלפון אמור להיות בפורמט תוך-ישראלי");
+
+  // Validate Email Address
+  let EmailValidationRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  if (!EmailValidationRegex.test(CourseInstructorEmail)) errors.push("כתובת האימייל אינה תקינה/ריקה")
+
+  if (errors.length > 0) {
+    res.render('order-details', {
+      errors: errors,
+      CourseInstructorName: CourseInstructorName,
+      CourseInstructorPhone: CourseInstructorPhone,
+      CourseInstructorEmail: CourseInstructorEmail,
+      ExpiredCourseTimeDate: ExpiredCourseTimeDate,
+      Address: Address,
+      NumberOfCourseParticipants: NumberOfCourseParticipants,
+      GeneralNotes: GeneralNotes,
+    })
+
+  } else {
+
+    // let CurrentUser = res.locals.currentUser
+
+    // create a new specification in db, redirect to dashboard
+
+    let normalizedExpiredCourseTimeDate = moment(ExpiredCourseTimeDate, "DD/MM/YYYY hh:mm").add(3, 'hours').add(2, 'days').format('YYYY-MM-DD HH:mm:ss')
+
+    let newSpecification = new Specification({
+      TransactionID: TransactionID,
+      ProductID: ProductID,
+      UserID: '1',
+      CourseInstructorName: CourseInstructorName,
+      CourseInstructorPhone: CourseInstructorPhone,
+      CourseInstructorEmail: CourseInstructorEmail,
+      ExpiredCourseTimeDate: normalizedExpiredCourseTimeDate,
+      Address: Address,
+      NumberOfCourseParticipants: NumberOfCourseParticipants,
+      GeneralNotes: GeneralNotes,
+    })
+
+    newSpecification.save()
+      .then(Specification => {
+        res.redirect('/dashboard')
+      })
+      .catch(err => {
+        req.flash('error_msg', "האפיון לא נשמר, קיימת בעיה, אנא פנה לעזרה טכנית")
+        res.redirect('/dashboard')
+        console.log(err)
+      })
+
+  }
 
 });
 

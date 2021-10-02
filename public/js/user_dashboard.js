@@ -1,26 +1,3 @@
-function ShowSuccessAlert(id, message) {
-
-    let alertTextTemplate = `<center><strong>${message}</strong></center>`
-
-    let alertsDiv = document.querySelector('.alerts')
-    let alertDiv = `<div class="alert alert-success alert-dismissible fade show" id=${id} role="alert">
-    <a style="direction: rtl;" id="successAlertText">${alertTextTemplate}</a>
-    <button type="button" class="close" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-</div>`
-
-    alertsDiv.innerHTML = alertDiv
-
-    let alert = document.querySelector(`#${id}`)
-
-    alert.classList.add("show")
-}
-
-function RemoveSuccessAlert(id) {
-    $(`#${id}`).alert('close')
-}
-
 async function buyCourse(e, userID) {
     /*
 
@@ -29,38 +6,45 @@ async function buyCourse(e, userID) {
      
     */
 
+    let CourseID = e.id.split("Course")[1]
+
     e.classList.add("disabled")
 
-    let registerTransactionRequest = await RegisterTransaction(e, userID)
+    let registerTransactionRequest = await RegisterTransaction(CourseID, userID)
 
-    let alertID = `BuyingCourse${e.id}`
+    let alertID = `BuyingCourse${CourseID}`
 
     if (registerTransactionRequest) {
         /*
           • show popup
           • change status
+          • make the specification button clickable
         */
 
         // show popup
-        let alertText = `נרשמת במערכת עבור קורס מזהה <code>${e.id}</code>, מנהל מערכת יחזור אלייך בהקדם האפשרי`
-        ShowSuccessAlert(alertID, alertText)
+        let alertText = `נרשמת במערכת עבור קורס מזהה <code>${CourseID}</code>, מנהל מערכת יחזור אלייך בהקדם האפשרי`
+        ShowAlert(alertID, alertText, 'alert-success', '.alerts')
         let alert = document.querySelector(`#${alertID}`)
         setTimeout(() => {
             if (alert) {
-                RemoveSuccessAlert(alertID)
+                RemoveAlert(alertID)
             }
         }, 5000)
 
         // change status
-        let columnStatus = document.querySelector(`#TransactionStatus${e.id}`)
+        let columnStatus = document.querySelector(`#TransactionStatus${CourseID}`)
         columnStatus.innerText = "בקשת רכישה בתהליך"
+
+        // make the specification button clickable
+        let specificationButton = document.querySelector(`#SpecificationCourse${CourseID}`)
+        specificationButton.classList.remove("disabled")
     } else {
-        RemoveSuccessAlert(alertID)
+        RemoveAlert(alertID)
         e.classList.remove("disabled")
     }
 }
 
-function RegisterTransaction(e, userID) {
+function RegisterTransaction(CourseID, userID) {
     return new Promise((resolve, reject) => {
         fetch("/registerTransaction", {
 
@@ -70,7 +54,7 @@ function RegisterTransaction(e, userID) {
             // Add body parameters
             body: JSON.stringify({
                 UserID: userID,
-                CourseID: e.id
+                CourseID: CourseID
             }),
 
             // Adding headers to the request 

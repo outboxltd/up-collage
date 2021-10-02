@@ -1,4 +1,6 @@
 const sequelize = require('sequelize');
+const moment = require('moment');
+
 const db = require('../config/seq-setup')
 
 const Transaction = db.define('transactions', {
@@ -18,7 +20,7 @@ const Transaction = db.define('transactions', {
     PurchaseDate: {
         type: sequelize.DATE,
         required: true,
-        defaultValue: new Date(),
+        defaultValue: moment().add(1, 'hours').format('YYYY-MM-DD HH:mm:ss'),
     },
     Status: {
         type: sequelize.STRING, // ENUM('WAITING', 'ACCEPTED')
