@@ -81,7 +81,7 @@ router.get('/dashboard', ensureAuthenticated, async (req, res, next) => {
   console.log(result)
 
   res.render('admin/dashboard', {
-    baseURL: req.protocol + '://' + req.get('host') + "/",
+    baseURL: req.protocol + '://' + req.get('host'),
     Transactions: result,
   });
 });
