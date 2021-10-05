@@ -3,7 +3,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const config = require("../config");
-const { ensureAuthenticated, checkExistingTransaction, checkExistingSpecification } = require('../config/auth')
+const { ensureAuthenticated, checkExistingTransaction, checkExistingSpecification, isUser } = require('../config/auth')
 
 const express = require('express');
 const router = express.Router();
@@ -185,7 +185,7 @@ router.get('/logout', (req, res) => {
 
 /* ================== USER DASHBOARD ================== */
 
-router.get('/dashboard', ensureAuthenticated, async function (req, res, next) {
+router.get('/dashboard', ensureAuthenticated, isUser, async function (req, res, next) {
 
   /*
     * • get available courses!

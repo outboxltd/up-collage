@@ -17,7 +17,7 @@ const fileUpload = require('express-fileupload');
 const config = require("./config.js")
 
 const indexRouter = require("./routes/index.js");
-const usersRouter = require("./routes/users.js");
+const adminsRouter = require("./routes/admin.js");
 
 app.use(express.urlencoded({
     extended: false
@@ -78,6 +78,6 @@ db.authenticate()
 
 
 app.use('/', indexRouter);
-app.use('/users/', usersRouter);
+app.use('/admin/', adminsRouter);
 
 module.exports = app;

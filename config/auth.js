@@ -4,6 +4,15 @@ const Transaction = require('../models/Transaction');
 const Specification = require('../models/Specification');
 
 module.exports = {
+    isUser: function (req, res, next) {
+        let CurrentUser = res.locals.currentUser
+        console.log(CurrentUser.IsAdmin)
+        if (!CurrentUser.IsAdmin) {
+            return next();
+        } else {
+            res.redirect('/admin/dashboard/')
+        }
+    },
     ensureAuthenticated: function (req, res, next) {
         if (req.isAuthenticated()) {
             return next();
