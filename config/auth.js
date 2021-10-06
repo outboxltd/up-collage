@@ -6,11 +6,18 @@ const Specification = require('../models/Specification');
 module.exports = {
     isUser: function (req, res, next) {
         let CurrentUser = res.locals.currentUser
-        console.log(CurrentUser.IsAdmin)
-        if (!CurrentUser.IsAdmin) {
+        if (CurrentUser.IsAdmin) {
+            res.redirect('/admin/dashboard/')
+        } else {
+            return next();
+        }
+    },
+    isAdmin: function (req, res, next) {
+        let CurrentUser = res.locals.currentUser
+        if (CurrentUser.IsAdmin) {
             return next();
         } else {
-            res.redirect('/admin/dashboard/')
+            res.redirect('/dashboard/')            
         }
     },
     ensureAuthenticated: function (req, res, next) {

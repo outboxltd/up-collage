@@ -3,7 +3,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const config = require("../config");
-const { ensureAuthenticated, checkExistingTransaction, checkExistingSpecification, isUser } = require('../config/auth')
+const { ensureAuthenticated, checkExistingTransaction, checkExistingSpecification, isAdmin } = require('../config/auth')
 
 const express = require('express');
 const router = express.Router();
@@ -19,7 +19,7 @@ const Transaction = require('../models/Transaction');
 const Specification = require('../models/Specification');
 /* ================== ADMIN DASHBOARD ================== */
 
-router.get('/dashboard', ensureAuthenticated, async (req, res, next) => {
+router.get('/dashboard', ensureAuthenticated, isAdmin, async (req, res, next) => {
 
   /*
     1. get all rows from transactions which are WAITING
@@ -45,8 +45,6 @@ router.get('/dashboard', ensureAuthenticated, async (req, res, next) => {
   for (let i = 0; i < Transactions.length; i++) {
     let Transaction = Transactions[i];
     let TransactionCopy = { ...Transaction }
-    console.log(TransactionCopy)
-    TransactionCopy["CourseName"] = Courses.find(Course => Course.id === TransactionCopy["ProductID"])["Name"]
 
     let Userr = await User.findAll({
       limit: 1,
@@ -63,18 +61,24 @@ router.get('/dashboard', ensureAuthenticated, async (req, res, next) => {
         ProductID: TransactionCopy["ProductID"]
       }
     })
-    Specificationn = JSON.parse(JSON.stringify(Specificationn, null, 2))[0]
+    let Specifications = JSON.parse(JSON.stringify(Specificationn, null, 2))
 
-    // User name, User organization, User Phone Number and to NumberOfCourseParticipants & ExpiredCourseTimeDate
+    // User Id, User name, User organization, User Phone Number, NumberOfCourseParticipants, ExpiredCourseTimeDate and Course Name
+    TransactionCopy["CourseName"] = Courses.find(Course => Course.id === TransactionCopy["ProductID"])["Name"]
     TransactionCopy["UserName"] = Userr.FullName
     TransactionCopy["UserOrganization"] = Userr.OrganizationName
     TransactionCopy["UserPhoneNumber"] = Userr.PhoneNumber
 
-    TransactionCopy["NumberOfCourseParticipants"] = Specificationn.NumberOfCourseParticipants
-    let normalizedExpiredCourseTimeDate = moment(Specificationn.ExpiredCourseTimeDate, 'YYYY-MM-DD HH:mm:ss').format('DD/MM/YYYY HH:mm')
-    TransactionCopy["ExpiredCourseTimeDate"] = normalizedExpiredCourseTimeDate
+    if (Specifications.length > 0) {
 
-    result.push(TransactionCopy)
+
+      TransactionCopy["NumberOfCourseParticipants"] = Specificationn.NumberOfCourseParticipants
+      let normalizedExpiredCourseTimeDate = moment(Specificationn.ExpiredCourseTimeDate, 'YYYY-MM-DD HH:mm:ss').format('DD/MM/YYYY HH:mm')
+      TransactionCopy["ExpiredCourseTimeDate"] = normalizedExpiredCourseTimeDate
+
+      result.push(TransactionCopy)
+
+    }
 
   }
 
