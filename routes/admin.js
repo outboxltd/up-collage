@@ -71,9 +71,9 @@ router.get('/dashboard', ensureAuthenticated, isAdmin, async (req, res, next) =>
 
     if (Specifications.length > 0) {
 
-
-      TransactionCopy["NumberOfCourseParticipants"] = Specificationn.NumberOfCourseParticipants
-      let normalizedExpiredCourseTimeDate = moment(Specificationn.ExpiredCourseTimeDate, 'YYYY-MM-DD HH:mm:ss').format('DD/MM/YYYY HH:mm')
+      let Specificationnn = Specifications[0]
+      TransactionCopy["NumberOfCourseParticipants"] = Specificationnn.NumberOfCourseParticipants
+      let normalizedExpiredCourseTimeDate = moment(Specificationnn.ExpiredCourseTimeDate, 'YYYY-MM-DD HH:mm:ss').format('DD/MM/YYYY HH:mm')
       TransactionCopy["ExpiredCourseTimeDate"] = normalizedExpiredCourseTimeDate
 
       result.push(TransactionCopy)
