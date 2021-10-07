@@ -58,9 +58,11 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th style="text-align: center;">כניסה</th>
+                    <th style="text-align: center;">פעולות</th>
+                    <th style="text-align: center;">תאריך שינוי סטטוס אחרון</th>
+                    <th style="text-align: center;">סטטוס</th>
                     <th class="text-center">תוקף</th>
-                    <th class="text-center">רישיונות</th>
+                    <th class="text-center">משתתפים</th>
                     <th style="text-align: center;">שיוך</th>
                     <th style="text-align: center;">שם המשתמש</th>
                     <th class="text-center">טלפון</th>
@@ -71,13 +73,25 @@
                 <% Transactions.forEach(Transaction => { %>
                 <tr style="text-align: center;" id="TransactionRow<%= Transaction['id'] %>">
                     <td style="text-align: center;">
-                        <button class="btn btn-danger" id="DenyTransaction<%= Transaction['id'] %>"
-                            onClick="Accept_Deny_User(this, `<%= Transaction['id'] %>`, false)"
+                        <% let AcceptedclassList = "btn btn-success" %>
+                        <% if (Transaction['Status'] === "ACCEPTED") { %>
+                            <% AcceptedclassList = "btn btn-success selected" %>
+                        <% } %>
+
+                        <% let DeniedclassList = "btn btn-danger" %>
+                        <% if (Transaction['Status'] === "WAITING") { %>
+                            <% DeniedclassList = "btn btn-danger selected" %>
+                        <% } %>
+                        <button class="<%= DeniedclassList%>" id="DenyTransaction<%= Transaction['id'] %>"
+                            onClick="Accept_Deny_User(this, `<%= Transaction['id'] %>`, `<%= Transaction['UserID'] %>`, false)"
                             type="button">סירוב</button>
-                        <button class="btn btn-success" id="AcceptTransaction<%= Transaction['id'] %>"
-                            onClick="Accept_Deny_User(this, `<%= Transaction['id'] %>`, true)"
+                        <button class="<%= AcceptedclassList %>" id="AcceptTransaction<%= Transaction['id'] %>"
+                            onClick="Accept_Deny_User(this, `<%= Transaction['id'] %>`, `<%= Transaction['UserID'] %>`, true)"
                             type="button">אישור</button>
                     </td>
+                    <td id="ChangedStatusDateTransaction<%= Transaction['id'] %>"><%= Transaction["ChangedStatusDate"] %></td>
+                    <% let Status_He = Transaction["Status"] === "ACCEPTED" ? "מאושר" : "דחוי"%>
+                    <td class="text-center" id="StatusTransaction<%= Transaction['id'] %>"><%= Status_He %></td>
                     <td><i onclick="makeEditable(this)" class="fa fa-pencil"></i>&nbsp; <a><%= Transaction["ExpiredCourseTimeDate"] %></a></td>
                     <td class="text-center"><%= Transaction["NumberOfCourseParticipants"] %></td>
                     <td><%= Transaction["UserOrganization"] %></td>
@@ -95,6 +109,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js?h=06ed58a0080308e1635633c2fd9a56a3"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="js/moment.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/admin_dashboard.js"></script>
 </body>

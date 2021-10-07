@@ -36,3 +36,7 @@ tr {
     color: black;
     text-align: center;
 }
+
+.selected {
+    border: 3px solid black !important;
+}

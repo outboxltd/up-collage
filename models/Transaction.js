@@ -20,12 +20,17 @@ const Transaction = db.define('transactions', {
     PurchaseDate: {
         type: sequelize.DATE,
         required: true,
-        defaultValue: moment().add(1, 'hours').format('YYYY-MM-DD HH:mm:ss'),
+        defaultValue: moment().format('YYYY-MM-DD HH:mm:ss'),
     },
     Status: {
         type: sequelize.STRING, // ENUM('WAITING', 'ACCEPTED')
         required: true,
         defaultValue: 'WAITING',
+    },
+    ChangedStatusDate: {
+        type: sequelize.DATE,
+        required: true,
+        defaultValue: moment().format('YYYY-MM-DD HH:mm:ss'),
     },
 })
 

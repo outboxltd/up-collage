@@ -7,7 +7,7 @@ module.exports = {
     isUser: function (req, res, next) {
         let CurrentUser = res.locals.currentUser
         if (CurrentUser.IsAdmin) {
-            res.redirect('/admin/dashboard/')
+            res.redirect('/admin/dashboard')
         } else {
             return next();
         }
@@ -17,7 +17,7 @@ module.exports = {
         if (CurrentUser.IsAdmin) {
             return next();
         } else {
-            res.redirect('/dashboard/')            
+            res.redirect('/dashboard')            
         }
     },
     ensureAuthenticated: function (req, res, next) {

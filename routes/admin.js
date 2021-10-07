@@ -22,7 +22,7 @@ const Specification = require('../models/Specification');
 router.get('/dashboard', ensureAuthenticated, isAdmin, async (req, res, next) => {
 
   /*
-    1. get all rows from transactions which are WAITING
+    1. get all rows from transactions which are WAITING *Client asked for all transactions
     2. translate ProductID to Course Name
     3. translate userID to User name, User organization, User Phone Number and to NumberOfCourseParticipants & ExpiredCourseTimeDate (specifications table)
     4. render an array of json objects that contain User Id, User name, User organization, User Phone Number, NumberOfCourseParticipants, ExpiredCourseTimeDate and Course Name
@@ -32,9 +32,9 @@ router.get('/dashboard', ensureAuthenticated, isAdmin, async (req, res, next) =>
 
   // step 1
   let Transactions = await Transaction.findAll({
-    where: {
-      Status: "WAITING"
-    }
+    // where: {
+    //   Status: "WAITING"
+    // }
   })
   Transactions = JSON.parse(JSON.stringify(Transactions, null, 2))
 
@@ -69,6 +69,9 @@ router.get('/dashboard', ensureAuthenticated, isAdmin, async (req, res, next) =>
     TransactionCopy["UserOrganization"] = Userr.OrganizationName
     TransactionCopy["UserPhoneNumber"] = Userr.PhoneNumber
 
+    let normalizedChangedStatusDate = moment(TransactionCopy.ChangedStatusDate, 'YYYY-MM-DD').format('DD/MM/YYYY')
+    TransactionCopy["ChangedStatusDate"] = normalizedChangedStatusDate
+
     if (Specifications.length > 0) {
 
       let Specificationnn = Specifications[0]
@@ -93,30 +96,32 @@ router.get('/dashboard', ensureAuthenticated, isAdmin, async (req, res, next) =>
 router.post('/ChangeTranscationStatus', ensureAuthenticated, async function (req, res, next) {
   // body should contain: TransactionID, isAllowed
   /*
-    * Change the Transaction status from WAITING to ACCEPTED
+    * Change the Transaction status from WAITING to ACCEPTED(wiseversa)
   */
   req.body = JSON.parse(Object.keys(req.body)[0])
   let {
     TransactionID,
+    UserID,
     isAllowed
   } = req.body
 
-  let CurrentUser = res.locals.currentUser
-
-  if (!isAllowed) res.json({ "code": 500 })
+  // if (!isAllowed) res.json({ "code": 500 })
 
   Transaction.update(
-    { Status: 'ACCEPTED' },
+    {
+      Status: isAllowed ? 'ACCEPTED' : "WAITING",
+      ChangedStatusDate: moment().format('YYYY-MM-DD HH:mm:ss'),
+    },
     {
       where: {
         id: TransactionID,
-        UserID: CurrentUser.id,
+        UserID: UserID,
       }
     }
   )
     .then((rows) => {
       res.json({
-        "code": 200
+        "code": 200,
       })
     })
     .catch((err) => {

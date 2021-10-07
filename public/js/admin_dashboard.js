@@ -1,4 +1,4 @@
-function ChangeTranscationStatus(TransactionId, isAllowed) {
+function ChangeTranscationStatus(TransactionId, UserID, isAllowed) {
     return new Promise((resolve, reject) => {
         fetch("/admin/ChangeTranscationStatus", {
 
@@ -8,6 +8,7 @@ function ChangeTranscationStatus(TransactionId, isAllowed) {
             // Add body parameters
             body: JSON.stringify({
                 TransactionID: TransactionId,
+                UserID: UserID,
                 isAllowed: isAllowed,
             }),
 
@@ -34,7 +35,7 @@ function ChangeTranscationStatus(TransactionId, isAllowed) {
     })
 }
 
-async function Accept_Deny_User(e, TransactionId, isAllowed) {
+async function Accept_Deny_User(e, TransactionId, UserID, isAllowed) {
     /*
 
      * call ChangeTranscationStatus()
@@ -43,33 +44,48 @@ async function Accept_Deny_User(e, TransactionId, isAllowed) {
     */
 
     let TransactionID = e.id.split("Transaction")[1]
+    let AcceptBtn = document.querySelector(`#AcceptTransaction${TransactionID}`)
+    let DenyBtn = document.querySelector(`#DenyTransaction${TransactionID}`)
 
-    e.classList.add("disabled")
+    AcceptBtn.classList.add("disabled")
+    DenyBtn.classList.add("disabled")
 
-    let ChangeTranscationStatusRequest = await ChangeTranscationStatus(TransactionId, isAllowed)
+    let ChangeTranscationStatusRequest = await ChangeTranscationStatus(TransactionId, UserID, isAllowed)
 
     let alertID = `TransactionAlert${TransactionID}`
 
     if (ChangeTranscationStatusRequest) {
         /*
           • show popup
-          • delete row
+          • delete row -- No
+          • add selected class
+          • change status + change last date of status update
         */
+
+        AcceptBtn.classList.remove("disabled")
+        DenyBtn.classList.remove("disabled")
 
         // show popup
         let alertText = isAllowed ? `המשתמש אושר בהצלחה` : "המשתמש נדחה בהצלחה"
         ShowAlert(alertID, alertText, 'alert-success', '.alerts')
         FadeRemoveAlert(alertID, 5000)
 
-        // delete row
-        let column = document.querySelector(`tr#TransactionRow${TransactionID}`)
-        column.remove()
+        // add selected class
+        let OtherBtn = e.id === AcceptBtn.id ? AcceptBtn : DenyBtn
+        if (OtherBtn.classList.contains("selected")) OtherBtn.classList.remove("selected")
+        e.classList.add("selected")
 
+        // change status + change last date of status update
+        let statusText = document.querySelector(`#StatusTransaction${TransactionID}`);
+        let ChangedStatusDateText = document.querySelector(`#ChangedStatusDateTransaction${TransactionID}`);
+        statusText.innerText = isAllowed ? `מאושר` : "דחוי";
+        ChangedStatusDateText.innerText = moment().format('DD/MM/YYYY');
     } else {
         let alertText = "קיימת בעיה, אנא פנו לעזרה הטכנית"
         ShowAlert(alertID, alertText, 'alert-danger', '.alerts')
         FadeRemoveAlert(alertID, 5000)
-        e.classList.remove("disabled")
+        AcceptBtn.classList.remove("disabled")
+        DenyBtn.classList.remove("disabled")
     }
 }
 
