@@ -45,45 +45,65 @@
                 <!-- <h2 class="text-center"><strong>שם הארגון : עירייה נהריה</strong></h2> -->
                 <h2 class="text-center" style="margin-bottom: 0px;"><strong>מספר רכישה : <%= Transaction.id %></strong>
                 </h2>
+                <div class="Courses">
+                    <i onclick="PrevCourse()" class="fa fa-arrow-left fabtn"></i>
+                    &nbsp
+                    <p id="count"></p>
+                    &nbsp
+                    <i onclick="NextCourse()" class="fa fa-arrow-right fabtn"></i>
+                </div>
+
+
                 <br>
-                
+
+                <% let isDisabled = "" %>
+                <% if (typeof ExistingSpecification?.CourseInstructorName != 'undefined') isDisabled="disabled" %>
+
                 <div class="mb-3" style="text-align: center;">
 
-                    <input class="form-control" type="text"
+                    <input class="form-control <%=isDisabled%> " type="text"
                         style="margin: 0px;margin-bottom: 10px;text-align: right;" name="CourseInstructorName"
-                        placeholder="שם מוביל הסדנה">
+                        placeholder="שם מוביל הסדנה"
+                        value="<%= typeof ExistingSpecification?.CourseInstructorName != 'undefined' ? ExistingSpecification?.CourseInstructorName : '' %>">
 
-                    <input class="form-control" type="text"
+                    <input class="form-control <%=isDisabled%> " type="text"
                         style="margin: 0px;margin-bottom: 10px;text-align: right;" name="CourseInstructorPhone"
-                        placeholder="טלפון מוביל סדנה">
+                        placeholder="טלפון מוביל סדנה"
+                        value="<%= typeof ExistingSpecification?.CourseInstructorPhone != 'undefined' ? ExistingSpecification?.CourseInstructorPhone : '' %>">
 
-                    <input class="form-control" type="email"
+                    <input class="form-control <%=isDisabled%> " type="email"
                         style="margin: 0px;margin-bottom: 10px;text-align: right;" name="CourseInstructorEmail"
-                        placeholder="מייל מוביל סדנה">
+                        placeholder="מייל מוביל סדנה"
+                        value="<%= typeof ExistingSpecification?.CourseInstructorEmail != 'undefined' ? ExistingSpecification?.CourseInstructorEmail : '' %>">
 
-                    <input class="form-control" placeholder="תאריך - יום ושעה לביצוע הסדנה"
-                        style="text-align: right;margin-bottom: 10px;" name="ExpiredCourseTimeDate" readonly>
+                    <input class="form-control <%=isDisabled%> " placeholder="תאריך - יום ושעה לביצוע הסדנה"
+                        style="text-align: right;margin-bottom: 10px;" name="ExpiredCourseTimeDate" readonly
+                        value="<%= typeof ExistingSpecification?.ExpiredCourseTimeDate != 'undefined' ? ExistingSpecification?.ExpiredCourseTimeDate : '' %>">
 
-                    <input class="form-control" placeholder="כתובת מדוייקת"
-                        style="text-align: right;margin-bottom: 10px;" name="Address">
+                    <input class="form-control <%=isDisabled%> " placeholder="כתובת מדוייקת"
+                        style="text-align: right;margin-bottom: 10px;" name="Address"
+                        value="<%= typeof ExistingSpecification?.Address != 'undefined' ? ExistingSpecification?.Address : '' %>">
                 </div>
 
                 <a class="already" href="#" style="text-align: center;">לכתובת זו תשלח הערכה עם כל האבזרים הנדרשים עד
                     יומיים לפני הסדנה</a>
 
-                <input class="form-control" type="number" placeholder="מספר משתתפים בסדנה"
-                    style="text-align: right;margin-bottom: 10px;" name="NumberOfCourseParticipants">
+                <input class="form-control <%=isDisabled%> " type="number" placeholder="מספר משתתפים בסדנה"
+                    style="text-align: right;margin-bottom: 10px;" name="NumberOfCourseParticipants"
+                    value="<%= typeof ExistingSpecification?.NumberOfCourseParticipants != 'undefined' ? ExistingSpecification?.NumberOfCourseParticipants : '' %>">
 
                 <div class="mb-3"></div>
 
-                <textarea class="form-control" placeholder="הערות כלליות"
-                    style="text-align: right;height: 56px;" name="GeneralNotes"></textarea>
+                <textarea class="form-control <%=isDisabled%> " placeholder="הערות כלליות"
+                    style="text-align: right;height: 56px;" name="GeneralNotes"
+                    value="<%= typeof ExistingSpecification?.GeneralNotes != 'undefined' ? ExistingSpecification?.GeneralNotes : '' %>"></textarea>
 
                 <input type="hidden" name="ProductID" value="">
                 <input type="hidden" name="TransactionID" value="<%= Transaction.id %>">
+                <input type="hidden" name="Number">
 
                 <div class="mb-3">
-                    <button class="btn btn-primary d-block w-100" onclick="checks()">עדכון פרטים</button>
+                    <button class="btn btn-primary d-block w-100 <%= isDisabled %>" onclick="checks()">עדכון פרטים</button>
                 </div>
                 <a class="already" href="#">שימו לב לאחר עדכון הפרטים לא ניתן לשנות את פרטי ההזמנה לסדנה זאת אנא בדקו
                     לפני שליחה</a>
@@ -99,6 +119,30 @@
     <script src="bootstrap/js/bootstrap-datetimepicker.he.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/orderDetails.js"></script>
+    <script>
+
+        checkreadonly("<%= typeof ExistingSpecification?.CourseInstructorName != 'undefined' %>")
+
+        let countText = document.querySelector('#count')
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const params = Object.fromEntries(urlSearchParams.entries());
+        let CourseCounter = params["CourseCounter"] === undefined ? 1 : Number(params["CourseCounter"])
+        let Courses = Number('<%= Transaction.times %>')
+
+        console.log(CourseCounter, Courses)
+
+        // if (params["CourseCounter"] === undefined) {
+        //     let url = new URL(window.location.href)
+        //     url.searchParams.set('CourseCounter', 1);
+        //     window.location.replace(url)
+        // }
+
+        if (isNaN(Number(params["CourseCounter"]))) CourseCounter = 1
+
+        if (CourseCounter > 0 && CourseCounter <= Courses) {
+            countText.innerText = `${CourseCounter} / ${Courses}`
+        }
+    </script>
 </body>
 
 </html>

@@ -16,10 +16,6 @@ $(document).ready(async () => {
         autoclose: true,
         todayHighlight: true,
         toggleActive: true,
-        // widgetPositioning: {
-        //     horizontal: 'left',
-        //     vertical: 'auto'
-        // }
     });
 })
 
@@ -77,17 +73,64 @@ function checks() {
 
         if (ProductID === params["courseID"]) {
             document.querySelector("input[name=ProductID]").value = params["courseID"]
+            document.querySelector("input[name=Number]").value = params["CourseCounter"] === undefined ? 1 : Number(params["CourseCounter"])
         } else {
             event.preventDefault();
 
             FadeRemoveAlert("FormErrors", 5000)
 
             let alertMessage = "קיימת בעיה עם הקישור, אנא נסו לחזור לעמוד הראשי ושוב לאפיין את הקורס ובמידת הצורך תפנו לעזרה הטכנית"
-            ShowAlert(`FormErrors`, alertMessage, 'alert-danger', '.alerts')    
+            ShowAlert(`FormErrors`, alertMessage, 'alert-danger', '.alerts')
 
             FadeRemoveAlert("FormErrors", 5000)
         }
 
     }
 
+}
+
+function PrevCourse() {
+    let url = new URL(window.location.href)
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+    let CurrentCourseCounter = params["CourseCounter"]
+
+    if (CurrentCourseCounter === undefined) {
+        url.searchParams.set('CourseCounter', 1);
+    } else {
+        url.searchParams.set('CourseCounter', Number(CurrentCourseCounter) - 1);
+    }
+
+    window.location.replace(url)
+}
+
+function NextCourse() {
+    let url = new URL(window.location.href)
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+    let CurrentCourseCounter = params["CourseCounter"] === undefined ? 1 : params["CourseCounter"]
+
+    url.searchParams.set('CourseCounter', Number(CurrentCourseCounter) + 1);
+
+    console.log(url)
+
+    window.location.replace(url)
+}
+
+function checkreadonly(isExisting) {
+    isExisting = isExisting === "true" ? true : false
+    let inputs = Array.from(document.querySelectorAll(".form-control"))
+    if (isExisting) {
+        for (let i = 0; i < inputs.length; i++) {
+            const input = inputs[i];
+            input.setAttribute("readonly", true)
+            input.classList.add("disabledInput")
+        }
+    } else {
+        for (let i = 0; i < inputs.length; i++) {
+            const input = inputs[i];
+            input.removeAttribute("readonly")
+            input.classList.remove("disabledInput")
+        }
+    }
 }

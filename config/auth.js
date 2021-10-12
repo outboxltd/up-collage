@@ -7,7 +7,8 @@ module.exports = {
     isUser: function (req, res, next) {
         let CurrentUser = res.locals.currentUser
         if (CurrentUser.IsAdmin) {
-            res.redirect('/admin/dashboard')
+            // res.redirect('/admin/confirmPayments')
+            res.redirect('/admin/specifications')
         } else {
             return next();
         }
@@ -39,13 +40,15 @@ module.exports = {
         Transactions = JSON.parse(JSON.stringify(Transactions, null, 2))
         return [Object.keys(Transactions).length > 0, Transactions]
     },
-    checkExistingSpecification: async function (UserID, ProductID) {
+    checkExistingSpecification: async function (UserID, ProductID, CourseNumber) {
+        let whereObj = {
+            UserID: UserID,
+            ProductID: ProductID,
+        }
+        if (CourseNumber) whereObj["Number"] = CourseNumber
         let Specifications = await Specification.findAll({
             limit: 1,
-            where: {
-                UserID: UserID,
-                ProductID: ProductID,
-            }
+            where: whereObj
         })
         Specifications = JSON.parse(JSON.stringify(Specifications, null, 2))
         return [Object.keys(Specifications).length > 0, Specifications]

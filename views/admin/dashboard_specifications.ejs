@@ -36,6 +36,7 @@
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link active" href="#">תמיכה טכנית</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">עלינו</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="window.location.replace(window.location.protocol + '//' + window.location.host + '/admin/confirmPayments')">אישור עסקאות</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">עמוד הבית</a></li>
                 </ul>
                 <form class="me-auto search-form" target="_self">
@@ -56,51 +57,35 @@
 
     <div class="table-responsive">
         <table class="table">
-            <thead>
+            <thead style="text-align: center;">
                 <tr>
-                    <th style="text-align: center;">פעולות</th>
-                    <th style="text-align: center;">תאריך שינוי סטטוס אחרון</th>
-                    <th style="text-align: center;">סטטוס</th>
-                    <th class="text-center">תוקף</th>
-                    <th class="text-center">משתתפים</th>
-                    <th style="text-align: center;">שיוך</th>
-                    <th style="text-align: center;">שם המשתמש</th>
-                    <th class="text-center">טלפון</th>
-                    <th style="text-align: center;">שם הקורס</th>
+                    <th>'עסקה מס</th>
+                    <th>'קורס מס</th>
+                    <th>טלפון מדריך</th>
+                    <th>שם מדריך</th>
+                    <th>טלפון מזמין</th>
+                    <th>ארגון המזמין</th>
+                    <th>שם מזמין</th>
+                    <th>תאריך הקורס</th>
+                    <th>תאריך עדכון איפיון</th>
+                    <th>שם הקורס</th>
                 </tr>
             </thead>
             <tbody style="text-align: center;">
-                <% Transactions.forEach(Transaction => { %>
-                <tr style="text-align: center;" id="TransactionRow<%= Transaction['id'] %>">
-                    <td style="text-align: center;">
-                        <% let AcceptedclassList = "btn btn-success" %>
-                        <% if (Transaction['Status'] === "ACCEPTED") { %>
-                            <% AcceptedclassList = "btn btn-success selected" %>
-                        <% } %>
-
-                        <% let DeniedclassList = "btn btn-danger" %>
-                        <% if (Transaction['Status'] === "WAITING") { %>
-                            <% DeniedclassList = "btn btn-danger selected" %>
-                        <% } %>
-                        <button class="<%= DeniedclassList%>" id="DenyTransaction<%= Transaction['id'] %>"
-                            onClick="Accept_Deny_User(this, `<%= Transaction['id'] %>`, `<%= Transaction['UserID'] %>`, false)"
-                            type="button">סירוב</button>
-                        <button class="<%= AcceptedclassList %>" id="AcceptTransaction<%= Transaction['id'] %>"
-                            onClick="Accept_Deny_User(this, `<%= Transaction['id'] %>`, `<%= Transaction['UserID'] %>`, true)"
-                            type="button">אישור</button>
-                    </td>
-                    <td id="ChangedStatusDateTransaction<%= Transaction['id'] %>"><%= Transaction["ChangedStatusDate"] %></td>
-                    <% let Status_He = Transaction["Status"] === "ACCEPTED" ? "מאושר" : "דחוי"%>
-                    <td class="text-center" id="StatusTransaction<%= Transaction['id'] %>"><%= Status_He %></td>
-                    <td><i onclick="makeEditable(this)" class="fa fa-pencil"></i>&nbsp; <a><%= Transaction["ExpiredCourseTimeDate"] %></a></td>
-                    <td class="text-center"><%= Transaction["NumberOfCourseParticipants"] %></td>
-                    <td><%= Transaction["UserOrganization"] %></td>
-                    <td style="text-align: center;"><%= Transaction["UserName"] %></td>
-                    <td><%= Transaction["UserPhoneNumber"] %></td>
-                    <td style="text-align: center;"><%= Transaction["CourseName"] %></td>
+                <% Specifications.forEach(Specification => { %>
+                <tr style="text-align: center;" id="SpecificationRow<%= Specification['id'] %>">
+                    <td><%= Specification["TransactionID"] %></td>
+                    <td><%= Specification["Number"] %></td>
+                    <td><%= Specification["CourseInstructorPhone"] %></td>
+                    <td><%= Specification["CourseInstructorName"] %></td>
+                    <td><%= Specification["UserPhoneNumber"] %></td>
+                    <td><%= Specification["UserOrganization"] %></td>
+                    <td><%= Specification["UserName"] %></td>
+                    <td><%= Specification["ExpiredCourseTimeDate"] %></td>
+                    <td><%= Specification["Date"] %></td>
+                    <td><%= Specification["CourseName"] %></td>
                 </tr>
                 <% }) %>
-                <tr style="text-align: center;"></tr>
             </tbody>
         </table>
     </div>
@@ -111,7 +96,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script src="js/moment.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/admin_dashboard.js"></script>
+    <script src="js/admin_dashboard_payments.js"></script>
 </body>
 
 </html>

@@ -296,6 +296,7 @@ router.post('/registerTransaction', ensureAuthenticated, async function (req, re
 router.get('/specificateorder', ensureAuthenticated, async function (req, res, next) {
 
   let courseID = req.query.courseID
+  let CourseCounter = req.query.CourseCounter === undefined ? 1 : req.query.CourseCounter
   let CurrentUser = res.locals.currentUser
 
   /* 
@@ -311,22 +312,27 @@ router.get('/specificateorder', ensureAuthenticated, async function (req, res, n
 
     let SelectedTransaction = ExistingTransaction
 
-    let CheckExistingSpecification_ = await checkExistingSpecification(CurrentUser.id, courseID)
+    let CheckExistingSpecification_ = await checkExistingSpecification(CurrentUser.id, courseID, CourseCounter)
     let isExistingSpecification = CheckExistingSpecification_[0]
+    let ExistingSpecification = isExistingSpecification ? CheckExistingSpecification_[1][0] : null
 
-    if (isExistingSpecification) { // there is an existing specification! BAD
+    // if (isExistingSpecification) { // there is an existing specification! BAD
 
-      req.flash('info_msg', "כבר קיים איפיון עבור קורס זה, לא ניתן לאפיין שוב את הקורס")
-      res.redirect('/dashboard')
+    //   req.flash('info_msg', "כבר קיים איפיון עבור קורס זה, לא ניתן לאפיין שוב את הקורס")
+    //   res.redirect('/dashboard')
 
-    } else { // there isnt an existing specification! GOOD
+    // } else { // there isnt an existing specification! GOOD
+
+    if (isExistingSpecification) ExistingSpecification["ExpiredCourseTimeDate"] = moment(ExistingSpecification["ExpiredCourseTimeDate"]).subtract(3, 'hours').subtract(2, 'days').format("DD/MM/YYYY hh:mm")
 
       res.render('order-details', {
         Transaction: SelectedTransaction,
         UserID: CurrentUser.id,
+        isExistingSpecification: isExistingSpecification,
+        ExistingSpecification: ExistingSpecification
       });
 
-    }
+    // }
 
   } else {
     req.flash('info_msg', "אין גישה: קורס לא נקנה")
@@ -346,6 +352,7 @@ router.post('/specificateorder', ensureAuthenticated, async function (req, res, 
     GeneralNotes,
     ProductID,
     TransactionID,
+    Number,
   } = req.body;
   let CurrentUser = res.locals.currentUser
 
@@ -364,7 +371,7 @@ router.post('/specificateorder', ensureAuthenticated, async function (req, res, 
 
   if (isExistingTransaction) { // there is an existing transaction! GOOD
 
-    let CheckExistingSpecification_ = await checkExistingSpecification(CurrentUser.id, ProductID)
+    let CheckExistingSpecification_ = await checkExistingSpecification(CurrentUser.id, ProductID, Number)
     let isExistingSpecification = CheckExistingSpecification_[0]
 
     if (isExistingSpecification) { // there is an existing specification! BAD
@@ -398,6 +405,7 @@ router.post('/specificateorder', ensureAuthenticated, async function (req, res, 
           Address: Address,
           NumberOfCourseParticipants: NumberOfCourseParticipants,
           GeneralNotes: GeneralNotes,
+          Number: Number,
         })
 
       } else {
@@ -417,6 +425,7 @@ router.post('/specificateorder', ensureAuthenticated, async function (req, res, 
           Address: Address,
           NumberOfCourseParticipants: NumberOfCourseParticipants,
           GeneralNotes: GeneralNotes,
+          Number: Number,
         })
 
         newSpecification.save()

@@ -54,6 +54,10 @@ const Specification = db.define('specifications', {
         type: sequelize.STRING,
         required: true
     },
+    Number: {
+        type: sequelize.INTEGER,
+        required: true
+    },
 })
 
 

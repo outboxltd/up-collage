@@ -72,22 +72,22 @@
                             <% let PurchaseCourseClasses = "btn btn-danger "%>
 
                             <% if (!Transaction || !Specification || Transaction.Status === "WAITING") { %>
-                            <% StartCourseClasses = `${StartCourseClasses} disabled` %>
+                                <% StartCourseClasses = `${StartCourseClasses} disabled` %>
                             <% } %>
 
-                            <% if (!Transaction || Specification) { %>
-                            <% SpecificationCourseClasses = `${SpecificationCourseClasses} disabled` %>
+                            <% if (!Transaction) { %>
+                                <% SpecificationCourseClasses = `${SpecificationCourseClasses} disabled` %>
                             <% } %>
 
                             <% if (Transaction) { %>
-                            <% PurchaseCourseClasses = `${PurchaseCourseClasses} disabled` %>
+                                <% PurchaseCourseClasses = `${PurchaseCourseClasses} disabled` %>
                             <% } %>
-
+                            
                             <button class="<%= StartCourseClasses %>" id="StartCourse<%= Course.id %>"
                                 onclick="window.location.replace(`/coursePage?courseID=<%= Course.id %>`)"
                                 type="button">התחלת הסדנה</button>
                             <button class="<%= SpecificationCourseClasses %>" id="SpecificationCourse<%= Course.id %>"
-                                onclick="window.location.replace(`/specificateorder?courseID=<%= Course.id %>`)"
+                                onclick="window.location.replace(`/specificateorder?courseID=<%= Course.id %>&CourseCounter=1`)"
                                 type="button">איפיון הסדנה</button>
                             <button class="<%= PurchaseCourseClasses %>" id="PurchaseCourse<%= Course.id %>"
                                 type="button" onclick="buyCourse(this, '<%= UserID %>')">רכישת סדנה</button>

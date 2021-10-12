@@ -32,6 +32,10 @@ const Transaction = db.define('transactions', {
         required: true,
         defaultValue: moment().format('YYYY-MM-DD HH:mm:ss'),
     },
+    times: {
+        type: sequelize.INTEGER,
+        required: true,
+    }
 })
 
 

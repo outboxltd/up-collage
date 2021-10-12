@@ -40,3 +40,21 @@ tr {
 .selected {
     border: 3px solid black !important;
 }
+
+.editable {
+    text-decoration: underline;
+    border-style: double;
+}
+
+.Courses {
+    display: flex;
+    align-items: baseline;
+}
+
+.fabtn {
+    cursor: pointer;
+}
+
+.disabledInput {
+    cursor: not-allowed;
+}
