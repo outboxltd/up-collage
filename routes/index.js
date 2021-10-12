@@ -265,6 +265,7 @@ router.post('/registerTransaction', ensureAuthenticated, async function (req, re
     const newTransaction = new Transaction({
       ProductID: CourseID,
       UserID: UserID,
+      times: 1,
     });
 
     const newTransactionRequest = await newTransaction.save().then(Transaction => { return true }).catch(err => { return err }) // isSuccess(if not true then err)
@@ -484,7 +485,7 @@ router.get('/coursePage', ensureAuthenticated, async function (req, res, next) {
 
       } else {
 
-        FormattedExpiredCourseTimeDate = moment(FormattedExpiredCourseTimeDate).format("DD.MM.YYYY hh:mm")
+        FormattedExpiredCourseTimeDate = moment(FormattedExpiredCourseTimeDate).format("DD.MM.YYYY HH:mm")
 
         res.render('coursePage', {
           ExpireDate: FormattedExpiredCourseTimeDate,

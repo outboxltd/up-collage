@@ -89,30 +89,45 @@ function checks() {
 
 }
 
-function PrevCourse() {
+function PrevCourse(Courses) {
     let url = new URL(window.location.href)
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
     let CurrentCourseCounter = params["CourseCounter"]
 
     if (CurrentCourseCounter === undefined) {
+
         url.searchParams.set('CourseCounter', 1);
+
     } else {
-        url.searchParams.set('CourseCounter', Number(CurrentCourseCounter) - 1);
+
+        if ((CurrentCourseCounter-1) > 0 && (CurrentCourseCounter-1) <= Courses) {
+            url.searchParams.set('CourseCounter', Number(CurrentCourseCounter) - 1);
+        }
+
     }
 
     window.location.replace(url)
 }
 
-function NextCourse() {
+function NextCourse(Courses) {
     let url = new URL(window.location.href)
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
     let CurrentCourseCounter = params["CourseCounter"] === undefined ? 1 : params["CourseCounter"]
 
-    url.searchParams.set('CourseCounter', Number(CurrentCourseCounter) + 1);
 
-    console.log(url)
+    if (CurrentCourseCounter === undefined) {
+
+        url.searchParams.set('CourseCounter', 1);
+
+    } else {
+
+        if ((CurrentCourseCounter+1) > 0 && (CurrentCourseCounter+1) <= Courses) {
+            url.searchParams.set('CourseCounter', Number(CurrentCourseCounter) + 1);
+        }
+
+    }
 
     window.location.replace(url)
 }
