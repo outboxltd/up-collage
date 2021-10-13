@@ -11,6 +11,7 @@ CREATE TABLE `specifications` (
   `Address` varchar(45) DEFAULT NULL,
   `NumberOfCourseParticipants` varchar(45) DEFAULT NULL,
   `GeneralNotes` varchar(45) DEFAULT NULL,
+  `Number` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;

@@ -4,5 +4,7 @@ CREATE TABLE `transactions` (
   `UserID` int(11) DEFAULT NULL,
   `PurchaseDate` date DEFAULT NULL,
   `Status` enum('WAITING','ACCEPTED') DEFAULT 'WAITING',
+  `ChangedStatusDate` date DEFAULT NULL,
+  `times` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
