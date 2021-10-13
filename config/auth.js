@@ -29,6 +29,13 @@ module.exports = {
         req.flash('info_msg', "Please log in to view the dashboard")
         res.redirect('/login')
     },
+    ifLoggedIn: function (req, res, next) {
+        if (req.isAuthenticated()) {
+            res.redirect('/dashboard')
+        } else {
+            return next()
+        }
+    },
     checkExistingTransaction: async function (UserID, ProductID) {
         let Transactions = await Transaction.findAll({
             limit: 1,

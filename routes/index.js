@@ -3,7 +3,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const config = require("../config");
-const { ensureAuthenticated, checkExistingTransaction, checkExistingSpecification, isUser } = require('../config/auth')
+const { ensureAuthenticated, ifLoggedIn, checkExistingTransaction, checkExistingSpecification, isUser } = require('../config/auth')
 
 const express = require('express');
 const router = express.Router();
@@ -49,7 +49,7 @@ router.post('/test', (req, res) => {
 
 /* ================== REGISTER ================== */
 
-router.get('/', function (req, res, next) {
+router.get('/', ifLoggedIn, (req, res, next) => {
   res.render('registerPage');
 });
 
@@ -153,6 +153,7 @@ router.post('/', (req, res) => {
 
             newUser.save()
               .then(user => {
+                req.flash('success_msg', "משתמש נרשם בהצלחה")
                 res.redirect('/login')
               })
               .catch(err => console.log(err))
@@ -165,7 +166,7 @@ router.post('/', (req, res) => {
 
 /* ================== LOGIN ================== */
 
-router.get('/login', function (req, res, next) {
+router.get('/login', ifLoggedIn, (req, res, next) => {
   res.render('loginPage');
 });
 
@@ -179,8 +180,8 @@ router.post('/login', (req, res, next) => {
 
 router.get('/logout', (req, res) => {
   req.logout();
-  req.flash('warning_msg', 'You are logged out')
-  res.redirect('/users/login');
+  req.flash('warning_msg', 'יצאת מהמשתמש')
+  res.redirect('/login');
 })
 
 /* ================== USER DASHBOARD ================== */

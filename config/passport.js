@@ -15,7 +15,7 @@ module.exports = function (passport) {
             }).then(user => {
                 if (!user) {
                     return done(null, false, {
-                        message: 'That email is not registered'
+                        message: 'האימייל לא רשום במערכת'
                     });
                 }
 
@@ -32,7 +32,7 @@ module.exports = function (passport) {
                         // fail!
                         console.log("fail");
                         return done(null, false, {
-                            message: 'Password incorrect'
+                            message: 'סיסמה לא נכונה'
                         });
                     }
                 });

@@ -85,8 +85,10 @@ router.get('/confirmPayments', ensureAuthenticated, isAdmin, async (req, res, ne
 
   console.log(result)
 
+  let baseUrl = (process.env.NODE_ENV === "production" ? "https" : req.protocol) + '://' + req.get('host')
+
   res.render('admin/dashboard_payments', {
-    baseURL: "https" + '://' + req.get('host'),
+    baseURL: baseUrl,
     Transactions: result,
   });
 });
@@ -160,8 +162,10 @@ router.get('/Specifications', ensureAuthenticated, isAdmin, async (req, res, nex
 
   console.log(result)
 
+  let baseUrl = (process.env.NODE_ENV === "production" ? "https" : req.protocol) + '://' + req.get('host')
+
   res.render('admin/dashboard_specifications', {
-    baseURL: "https" + '://' + req.get('host'),
+    baseURL: baseUrl,
     Specifications: result,
   });
 });
