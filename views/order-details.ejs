@@ -46,11 +46,11 @@
                 <h2 class="text-center" style="margin-bottom: 0px;"><strong>מספר רכישה : <%= Transaction.id %></strong>
                 </h2>
                 <div class="Courses">
-                    <i onclick="PrevCourse('<%= Transaction.times %>')" class="fa fa-arrow-left fabtn"></i>
+                    <i onclick="MoveCourse('<%= Transaction.times %>', false)" class="fa fa-arrow-left fabtn"></i>
                     &nbsp
                     <p id="count"></p>
                     &nbsp
-                    <i onclick="NextCourse('<%= Transaction.times %>')" class="fa fa-arrow-right fabtn"></i>
+                    <i onclick="MoveCourse('<%= Transaction.times %>', true)" class="fa fa-arrow-right fabtn"></i>
                 </div>
 
 

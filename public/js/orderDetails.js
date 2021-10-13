@@ -89,11 +89,11 @@ function checks() {
 
 }
 
-function PrevCourse(Courses) {
+function MoveCourse(Courses, nextCourse) {
     let url = new URL(window.location.href)
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
-    let CurrentCourseCounter = params["CourseCounter"]
+    let CurrentCourseCounter = params["CourseCounter"] === undefined ? 1 : Number(params["CourseCounter"])
 
     if (CurrentCourseCounter === undefined) {
 
@@ -101,30 +101,10 @@ function PrevCourse(Courses) {
 
     } else {
 
-        if ((CurrentCourseCounter-1) > 0 && (CurrentCourseCounter-1) <= Courses) {
-            url.searchParams.set('CourseCounter', Number(CurrentCourseCounter) - 1);
-        }
+        let futureCourseNumber = nextCourse ? (CurrentCourseCounter+1) : (CurrentCourseCounter-1)
 
-    }
-
-    window.location.replace(url)
-}
-
-function NextCourse(Courses) {
-    let url = new URL(window.location.href)
-    const urlSearchParams = new URLSearchParams(window.location.search);
-    const params = Object.fromEntries(urlSearchParams.entries());
-    let CurrentCourseCounter = params["CourseCounter"] === undefined ? 1 : params["CourseCounter"]
-
-
-    if (CurrentCourseCounter === undefined) {
-
-        url.searchParams.set('CourseCounter', 1);
-
-    } else {
-
-        if ((CurrentCourseCounter+1) > 0 && (CurrentCourseCounter+1) <= Courses) {
-            url.searchParams.set('CourseCounter', Number(CurrentCourseCounter) + 1);
+        if (futureCourseNumber > 0 && futureCourseNumber <= Courses) {
+            url.searchParams.set('CourseCounter', futureCourseNumber);
         }
 
     }
