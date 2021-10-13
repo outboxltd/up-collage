@@ -284,8 +284,8 @@ router.post('/registerTransaction', ensureAuthenticated, async function (req, re
       let resObject = {
         "code": 500,
       }
-      if (!webHookRequestSucceed) errPayloads["WebHookPayload"] = webHookRequest
-      if (!newTransactionRequestSucceed) errPayloads["newTransactionPayload"] = newTransactionRequest
+      // if (!webHookRequestSucceed) errPayloads["WebHookPayload"] = webHookRequest
+      // if (!newTransactionRequestSucceed) errPayloads["newTransactionPayload"] = newTransactionRequest
       res.json(resObject)
     }
 

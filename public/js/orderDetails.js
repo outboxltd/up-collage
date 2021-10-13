@@ -7,7 +7,7 @@ $(document).ready(async () => {
 
     $('input[name=ExpiredCourseTimeDate]').datetimepicker({
         format: "dd/mm/yyyy hh:ii",
-        startDate: new Date(),
+        startDate: moment().add(3, "days").toDate(),
         todayBtn: "linked",
         clearBtn: true,
         language: "he",
