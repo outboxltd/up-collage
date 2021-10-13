@@ -14,9 +14,7 @@ module.exports = function (passport) {
                 }
             }).then(user => {
                 if (!user) {
-                    return done(null, false, {
-                        message: 'האימייל לא רשום במערכת'
-                    });
+                    return done(null, false, {type: 'error_msg', message: 'משתמש אינו קיים'});
                 }
 
                 bcrypt.compare(password, user.Password, function (err, res) {
@@ -32,6 +30,7 @@ module.exports = function (passport) {
                         // fail!
                         console.log("fail");
                         return done(null, false, {
+                            type: 'error_msg',
                             message: 'סיסמה לא נכונה'
                         });
                     }
