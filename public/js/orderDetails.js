@@ -4,19 +4,6 @@ $(document).ready(async () => {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
     ProductID = params["courseID"]
-
-    $('input[name=ExpiredCourseTimeDate]').datetimepicker({
-        format: "dd/mm/yyyy hh:ii",
-        startDate: moment().add(3, "days").toDate(),
-        todayBtn: "linked",
-        clearBtn: true,
-        language: "he",
-        daysOfWeekDisabled: "6",
-        showMeridian: 1,
-        autoclose: true,
-        todayHighlight: true,
-        toggleActive: true,
-    });
 })
 
 function checks() {
@@ -124,8 +111,23 @@ function checkreadonly(isExisting) {
     } else {
         for (let i = 0; i < inputs.length; i++) {
             const input = inputs[i];
-            input.removeAttribute("readonly")
+            if (input.getAttribute("name") !== "ExpiredCourseTimeDate") {
+                input.removeAttribute("readonly")
+            }
             input.classList.remove("disabledInput")
         }
+
+        $('input[name=ExpiredCourseTimeDate]').datetimepicker({
+            format: "dd/mm/yyyy hh:ii",
+            startDate: moment().add(3, "days").toDate(),
+            todayBtn: "linked",
+            clearBtn: true,
+            language: "he",
+            daysOfWeekDisabled: "6",
+            showMeridian: 1,
+            autoclose: true,
+            todayHighlight: true,
+            toggleActive: true,
+        });
     }
 }
