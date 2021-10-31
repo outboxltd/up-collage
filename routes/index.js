@@ -9,15 +9,14 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
-const { Op } = require("sequelize");
+const db = require('../config/seq-setup')
+const {Op, QueryTypes } = require("sequelize");
 const axios = require('axios');
 const moment = require('moment');
-
 const User = require('../models/User');
 const Course = require('../models/Course');
 const Transaction = require('../models/Transaction');
 const Specification = require('../models/Specification');
-
 /* ================== TEST ================== */
 
 router.post('/test', (req, res) => {
@@ -325,14 +324,14 @@ router.get('/specificateorder', ensureAuthenticated, async function (req, res, n
 
     // } else { // there isnt an existing specification! GOOD
 
-    if (isExistingSpecification) ExistingSpecification["ExpiredCourseTimeDate"] = moment(ExistingSpecification["ExpiredCourseTimeDate"]).subtract(3, 'hours').subtract(2, 'days').format("DD/MM/YYYY hh:mm")
+    if (isExistingSpecification) ExistingSpecification["ExpiredCourseTimeDate"] = moment(ExistingSpecification["ExpiredCourseTimeDate"]).subtract(3, 'hours').subtract(2, 'days').format("DD/MM/YYYY HH:mm")
 
-      res.render('order-details', {
-        Transaction: SelectedTransaction,
-        UserID: CurrentUser.id,
-        isExistingSpecification: isExistingSpecification,
-        ExistingSpecification: ExistingSpecification
-      });
+    res.render('order-details', {
+      Transaction: SelectedTransaction,
+      UserID: CurrentUser.id,
+      isExistingSpecification: isExistingSpecification,
+      ExistingSpecification: ExistingSpecification
+    });
 
     // }
 
@@ -414,7 +413,7 @@ router.post('/specificateorder', ensureAuthenticated, async function (req, res, 
 
         // create a new specification in db, redirect to dashboard
 
-        let normalizedExpiredCourseTimeDate = moment(ExpiredCourseTimeDate, "DD/MM/YYYY hh:mm").add(3, 'hours').add(2, 'days').format('YYYY-MM-DD HH:mm:ss')
+        let normalizedExpiredCourseTimeDate = moment(ExpiredCourseTimeDate, "DD/MM/YYYY HH:mm").add(3, 'hours').add(2, 'days').format('YYYY-MM-DD HH:mm:ss')
 
         let newSpecification = new Specification({
           TransactionID: TransactionID,
@@ -465,23 +464,29 @@ router.get('/coursePage', ensureAuthenticated, async function (req, res, next) {
 
   if (isExistingTransaction) { // there is an existing transaction! GOOD
 
-    let CheckExistingSpecification_ = await checkExistingSpecification(CurrentUser.id, courseID)
+    let CheckExistingSpecification_ = await checkExistingSpecification(CurrentUser.id, courseID, "PASS!", true, true)
     let isExistingSpecification = CheckExistingSpecification_[0]
-    let SelectedSpecification = isExistingSpecification ? CheckExistingSpecification_[1][0] : null
+    let SelectedSpecifications = isExistingSpecification ? CheckExistingSpecification_[1] : null
 
     if (isExistingSpecification) { // there is an existing specification! GOOD
 
       // Check Specification expire date for the product id.
-
-
-      let FormattedExpiredCourseTimeDate = moment(SelectedSpecification.ExpiredCourseTimeDate, 'YYYY-MM-DD HH:mm:ss')
+      let FormattedExpiredCourseTimeDate = moment(SelectedSpecifications[0].ExpiredCourseTimeDate, 'YYYY-MM-DD HH:mm:ss')
       let Now = moment()
 
-      let isExpired = Now.diff(FormattedExpiredCourseTimeDate, "minutes", true) > 0;
+      let OneHourBefore = moment(FormattedExpiredCourseTimeDate).subtract(1, "hours")
+      let ThreeHoursAfter = moment(FormattedExpiredCourseTimeDate).add(3, "hours")
+
+      console.log(FormattedExpiredCourseTimeDate.format("DD.MM.YYYY HH:mm"), OneHourBefore.format("DD.MM.YYYY HH:mm"), ThreeHoursAfter.format("DD.MM.YYYY HH:mm"))
+
+      let isBefore_BeforeOneHour = Now.diff(OneHourBefore, "minutes", true) > 0;
+      let isBefore_AfterThreeHours = Now.diff(ThreeHoursAfter, "minutes", true) > 0;
+
+      let isExpired = isBefore_BeforeOneHour || !isBefore_AfterThreeHours
 
       if (isExpired) {
 
-        req.flash('error_msg', "התוקף של הקורס נגמר! אנא פנו לעזרה טכנית")
+        req.flash('error_msg', "הקורס עדיין לא נפתח / הקורס פג תוקף, אנא פנו לעזרה טכנית")
         res.redirect('/dashboard')
 
       } else {
