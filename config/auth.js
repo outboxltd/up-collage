@@ -51,7 +51,7 @@ module.exports = {
     checkExistingSpecification: async function (UserID, ProductID, CourseNumber, allSpecifications, orderByDate) {
         let Specifications;
         if (orderByDate === true) {
-            Specifications = await db.query("SELECT * FROM `specifications` ORDER BY ABS( DATEDIFF( ExpiredCourseTimeDate, NOW() ) )", { type: db.QueryTypes.SELECT })
+            Specifications = await db.query(`SELECT * FROM \`specifications\` WHERE UserID = \"${UserID}\" ORDER BY ABS( DATEDIFF( ExpiredCourseTimeDate, NOW() ) )`, { type: db.QueryTypes.SELECT })
         } else {
             let whereObj = {
                 UserID: UserID,

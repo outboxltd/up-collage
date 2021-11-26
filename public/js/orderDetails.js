@@ -117,9 +117,11 @@ function checkreadonly(isExisting) {
             input.classList.remove("disabledInput")
         }
 
+        let startDate = moment().subtract(moment().get('hours'), "hours").subtract(moment().get('minutes'), 'minutes').subtract(moment().get('seconds'), "seconds").add(3, "days").toDate()
+
         $('input[name=ExpiredCourseTimeDate]').datetimepicker({
             format: "dd/mm/yyyy hh:ii",
-            startDate: moment().add(3, "days").toDate(),
+            startDate: startDate,
             todayBtn: "linked",
             clearBtn: true,
             language: "he",

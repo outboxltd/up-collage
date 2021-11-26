@@ -10,7 +10,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
 const db = require('../config/seq-setup')
-const {Op, QueryTypes } = require("sequelize");
+const { Op, QueryTypes } = require("sequelize");
 const axios = require('axios');
 const moment = require('moment');
 const User = require('../models/User');
@@ -219,6 +219,7 @@ router.get('/dashboard', ensureAuthenticated, isUser, async function (req, res, 
     Transactions: Transactions,
     Specifications: Specifications,
     UserID: res.locals.currentUser.id,
+    UserName: res.locals.currentUser.FullName,
   });
 });
 
@@ -413,8 +414,7 @@ router.post('/specificateorder', ensureAuthenticated, async function (req, res, 
 
         // create a new specification in db, redirect to dashboard
 
-        let normalizedExpiredCourseTimeDate = moment(ExpiredCourseTimeDate, "DD/MM/YYYY HH:mm").add(3, 'hours').add(2, 'days').format('YYYY-MM-DD HH:mm:ss')
-
+        let normalizedExpiredCourseTimeDate = moment(ExpiredCourseTimeDate, "DD/MM/YYYY HH:mm").add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
         let newSpecification = new Specification({
           TransactionID: TransactionID,
           ProductID: ProductID,
@@ -470,9 +470,13 @@ router.get('/coursePage', ensureAuthenticated, async function (req, res, next) {
 
     if (isExistingSpecification) { // there is an existing specification! GOOD
 
+      console.log(new Date(SelectedSpecifications[0].ExpiredCourseTimeDate))
+
       // Check Specification expire date for the product id.
-      let FormattedExpiredCourseTimeDate = moment(SelectedSpecifications[0].ExpiredCourseTimeDate, 'YYYY-MM-DD HH:mm:ss')
+      let FormattedExpiredCourseTimeDate = moment(new Date(SelectedSpecifications[0].ExpiredCourseTimeDate), 'YYYY-MM-DD HH:mm:ss').subtract(2, "hours")
       let Now = moment()
+
+      console.log(FormattedExpiredCourseTimeDate)
 
       let OneHourBefore = moment(FormattedExpiredCourseTimeDate).subtract(1, "hours")
       let ThreeHoursAfter = moment(FormattedExpiredCourseTimeDate).add(3, "hours")
@@ -482,7 +486,7 @@ router.get('/coursePage', ensureAuthenticated, async function (req, res, next) {
       let isBefore_BeforeOneHour = Now.diff(OneHourBefore, "minutes", true) > 0;
       let isBefore_AfterThreeHours = Now.diff(ThreeHoursAfter, "minutes", true) > 0;
 
-      let isExpired = isBefore_BeforeOneHour || !isBefore_AfterThreeHours
+      let isExpired = !isBefore_BeforeOneHour || isBefore_AfterThreeHours
 
       if (isExpired) {
 
@@ -496,6 +500,7 @@ router.get('/coursePage', ensureAuthenticated, async function (req, res, next) {
         res.render('coursePage', {
           ExpireDate: FormattedExpiredCourseTimeDate,
           UserID: res.locals.currentUser.id,
+          UserName: res.locals.currentUser.FullName
         });
 
       }

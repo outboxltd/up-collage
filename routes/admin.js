@@ -139,7 +139,7 @@ router.get('/Specifications', ensureAuthenticated, isAdmin, async (req, res, nex
     SpecificationCopy["UserOrganization"] = Userr.OrganizationName
     SpecificationCopy["UserPhoneNumber"] = Userr.PhoneNumber
 
-    let normalizedExpiredCourseTimeDate = moment(SpecificationCopy.ExpiredCourseTimeDate).subtract(3, 'hours').subtract(2, 'days').format('DD/MM/YYYY HH:mm')
+    let normalizedExpiredCourseTimeDate = moment(SpecificationCopy.ExpiredCourseTimeDate).subtract(2, 'hours').format('DD/MM/YYYY HH:mm')
     SpecificationCopy["ExpiredCourseTimeDate"] = normalizedExpiredCourseTimeDate
 
     let normalizedCreationDate = moment(SpecificationCopy.Date).format('DD/MM/YYYY HH:mm')
