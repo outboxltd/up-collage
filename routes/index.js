@@ -179,7 +179,7 @@ router.post('/login', (req, res, next) => {
 
 router.get('/logout', (req, res) => {
   req.logout();
-  req.flash('warning_msg', 'יצאת מהמשתמש')
+  req.flash('warning_msg', 'התנתקת מהמשתמש')
   res.redirect('/login');
 })
 

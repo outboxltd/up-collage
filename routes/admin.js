@@ -90,6 +90,7 @@ router.get('/confirmPayments', ensureAuthenticated, isAdmin, async (req, res, ne
   res.render('admin/dashboard_payments', {
     baseURL: baseUrl,
     Transactions: result,
+    UserName: res.locals.currentUser.FullName
   });
 });
 
@@ -167,6 +168,7 @@ router.get('/Specifications', ensureAuthenticated, isAdmin, async (req, res, nex
   res.render('admin/dashboard_specifications', {
     baseURL: baseUrl,
     Specifications: result,
+    UserName: res.locals.currentUser.FullName
   });
 });
 
