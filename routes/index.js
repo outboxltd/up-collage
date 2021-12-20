@@ -325,7 +325,7 @@ router.get('/specificateorder', ensureAuthenticated, async function (req, res, n
 
     // } else { // there isnt an existing specification! GOOD
 
-    if (isExistingSpecification) ExistingSpecification["ExpiredCourseTimeDate"] = moment(ExistingSpecification["ExpiredCourseTimeDate"]).subtract(2, 'hours').subtract(0, 'days').format("DD/MM/YYYY HH:mm")
+    if (isExistingSpecification) ExistingSpecification["ExpiredCourseTimeDate"] = moment(ExistingSpecification["ExpiredCourseTimeDate"]).subtract(0, 'hours').subtract(0, 'days').format("DD/MM/YYYY HH:mm")
 
     res.render('order-details', {
       Transaction: SelectedTransaction,
