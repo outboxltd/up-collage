@@ -490,8 +490,19 @@ router.get('/coursePage', ensureAuthenticated, async function (req, res, next) {
 
       if (isExpired) {
 
-        req.flash('error_msg', "הקורס עדיין לא נפתח / הקורס פג תוקף, אנא פנו לעזרה טכנית")
-        res.redirect('/dashboard')
+        // req.flash('error_msg', "הקורס עדיין לא נפתח / הקורס פג תוקף, אנא פנו לעזרה טכנית")
+        // res.redirect('/dashboard')
+
+        // bad parctice
+        FormattedExpiredCourseTimeDate = moment(FormattedExpiredCourseTimeDate).format("DD.MM.YYYY HH:mm")
+
+        res.render('coursePage', {
+          ExpireDate: FormattedExpiredCourseTimeDate,
+          UserID: res.locals.currentUser.id,
+          UserName: res.locals.currentUser.FullName
+        });
+
+        // bad parctice
 
       } else {
 
